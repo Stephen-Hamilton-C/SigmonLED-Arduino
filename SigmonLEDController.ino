@@ -19,7 +19,8 @@ TBlendType currentBlending;
 
 enum MODE {
   REDGREENBLUE,
-  PALATTE,
+  PALETTE,
+  SOLIDPALETTE,
   SLEEP
 };
 MODE currentMode = REDGREENBLUE;
@@ -28,7 +29,7 @@ enum SERIALSTATE {
   COMMAND,
   BRIGHTCOMMAND,
   DELAYCOMMAND,
-  PALATTECOMMAND,
+  PALETTECOMMAND,
   BLENDCOMMAND,
   NUMBER
 };
@@ -77,7 +78,7 @@ int charToInt(char inChar) {
   }
 }
 
-void ReadSerialNum(char rxInt){
+void ReadSerialNum(int rxInt){
   switch(currentNumState){
     case THOUSANDS:
       serialNumber = 1000 * rxInt;
@@ -156,10 +157,16 @@ void ReadSerial() {
                 break;
               }
             case 'p': {
-                currentState = PALATTECOMMAND;
+                currentState = PALETTECOMMAND;
+                currentMode = PALETTE;
                 //Serial.println("Palatte");
                 break;
               }
+            case 'P': {
+                currentState = PALETTECOMMAND;
+                currentMode = SOLIDPALETTE;
+                break;
+            }
             case 'B': {
                 currentState = NUMBER;
                 ResetSerialNum(BRIGHT);
@@ -217,7 +224,7 @@ void ReadSerial() {
         }
         break;
       }
-      case PALATTECOMMAND: {
+      case PALETTECOMMAND: {
           switch (rxChar) {
             case 'R': {
                 currentPalette = RainbowStripeColors_p;
@@ -271,7 +278,7 @@ void ReadSerial() {
                 break;
               }
           }
-          currentMode = PALATTE;
+          //currentMode = PALETTE;
           currentState = COMMAND;
           delayTime = lastDelayTime;
           //Serial.println("READY:");
@@ -287,11 +294,18 @@ void RGBMode() {
   }
 }
 
-void PalatteMode(uint8_t colorIndex) {
+void PaletteMode(uint8_t colorIndex) {
   for (int i = 0; i < NUM_LEDS; i++) {
     leds[i] = ColorFromPalette(currentPalette, colorIndex, 255, currentBlending);
     colorIndex += 3;
   }
+}
+
+void SolidPaletteMode(uint8_t colorIndex){
+  for (int i = 0; i < NUM_LEDS; i++){
+    leds[i] = ColorFromPalette(currentPalette, colorIndex, 255, currentBlending);
+  }
+  colorIndex += 1;
 }
 
 void loop() {
@@ -306,8 +320,11 @@ void loop() {
     case REDGREENBLUE:
       RGBMode();
       break;
-    case PALATTE:
-      PalatteMode(startIndex);
+    case PALETTE:
+      PaletteMode(startIndex);
+      break;
+    case SOLIDPALETTE:
+      SolidPaletteMode(startIndex);
       break;
   }
 
