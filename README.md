@@ -3,6 +3,8 @@ This code turns your Arduino into a WS2811 LED controller. Control using UART, w
 
 Originally created as a Christmas gift for my sister.
 
+See [SigmonLED-App](https://github.com/Stephen-Hamilton-C/SigmonLED-App) for an Android and Desktop application to control this over Bluetooth.
+
 ## Setup
 You'll need an Arduino, LED strip, and a serial interface to the Arduino. I use an HM-10 BLE module from DSD Tech, it has massive range and fits my needs.
 
@@ -11,8 +13,9 @@ By default, the LED mode is WS2811, so any LED strip with a WS2811 or similar ch
 1. Make sure you have the FastLED library installed and up-to-date.
 2. Plug the LED's VCC to 5V, GND to ground, and IN (or data) to digital 3 or other PWM pin.
 3. If digital 3 is not available to you, you will need to change the `LED_PIN` constant at the top of the script to whatever your pin is.
-4. Plug the Arduino into your computer via USB and upload the code
-5. Access commands through the Arduino Serial Monitor (Tools>Serial Monitor)
+4. Put in the amount of LEDs on your strip in the `NUM_LEDS` constant. If there are too many to count, check the product page or packaging of your LED strip.
+5. Plug the Arduino into your computer via USB and upload the code
+6. Access commands through the Arduino Serial Monitor (Tools>Serial Monitor)
 
 ## Commands
 - ``x``: Stops listening for arguments and listens for commands. Basically a "nevermind" command.
