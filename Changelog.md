@@ -6,7 +6,7 @@ SigmonLED uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 [comment]: # (This is a comment, it will not be included)
 
-## [0.1.1] - 2021-02-15
+## [0.2.0] - 2021-02-15
 ### Added
 - This Changelog :)
 - Solid palette mode. Use `P` command to activate
