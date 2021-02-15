@@ -42,7 +42,7 @@ By default, the LED mode is WS2811, so any LED strip with a WS2811 or similar ch
 - ``S``: Sleep. Turns off LEDs.
 - ``W``: Wake. Turns LEDs on full brightness at full white.
 
-Command example: `r127g000b255` will make all LEDs turn purple.
+Command example: `r127g000b255` will make all LEDs turn purple. \
 Command example: `prl` will activate the Rainbow palette with linear blending.
 
 ## Licensed
