@@ -12,7 +12,14 @@ int brightness = 16;
 int delayTime = CMD_DELAY;
 int lastDelayTime = 0;
 int serialNumber = 0;
-String serialNumStr = "";
+
+int paletteRed = 0;
+int paletteGreen = 0;
+int paletteBlue = 0;
+int paletteIndexColorsMade = 0;
+int paletteColorsMade = 0;
+CRGB paletteBuffer[16];
+CRGBPalette16 customPalette;
 
 CRGBPalette16 currentPalette;
 TBlendType currentBlending;
@@ -30,12 +37,16 @@ enum SERIALSTATE {
   BRIGHTCOMMAND,
   DELAYCOMMAND,
   PALETTECOMMAND,
+  CREATEPALETTECOMMAND,
   BLENDCOMMAND,
   NUMBER
 };
 SERIALSTATE currentState = COMMAND;
 
 enum SERIALNUMPURPOSE {
+  STORERED,
+  STOREGREEN,
+  STOREBLUE,
   RED,
   GREEN,
   BLUE,
@@ -83,22 +94,22 @@ void ReadSerialNum(int rxInt){
     case THOUSANDS:
       serialNumber = 1000 * rxInt;
       currentNumState = HUNDREDS;
-      Serial.println("Thousands: "+String(rxInt));
+      //Serial.println("Thousands: "+String(rxInt));
       break;
     case HUNDREDS:
       serialNumber += 100 * rxInt;
       currentNumState = TENS;
-      Serial.println("Hundreds: "+String(rxInt));
+      //Serial.println("Hundreds: "+String(rxInt));
       break;
     case TENS:
       serialNumber += 10 * rxInt;
       currentNumState = ONES;
-      Serial.println("Tens: "+String(rxInt));
+      //Serial.println("Tens: "+String(rxInt));
       break;
     case ONES:
       serialNumber += rxInt;
       currentNumState = FIN;
-      Serial.println("Ones: "+String(rxInt));
+      //Serial.println("Ones: "+String(rxInt));
       break;
   }
 }
@@ -107,7 +118,6 @@ void ResetSerialNum(SERIALNUMPURPOSE purpose, SERIALNUMSTATE numState = HUNDREDS
   currentState = NUMBER;
   currentNumState = numState;
   serialNumber = 0;
-  serialNumStr = "";
   serialNumPurpose = purpose;
 }
 
@@ -130,11 +140,13 @@ void ReadSerial() {
       currentState = COMMAND;
       delayTime = lastDelayTime;
       //Serial.println("READY:");
+      Serial.println("Rese");
       return;
     }
-
+    
     switch (currentState) {
       case COMMAND: {
+          Serial.println("COMMAND");
           lastDelayTime = delayTime;
           delayTime = CMD_DELAY;
           switch (rxChar) {
@@ -167,13 +179,24 @@ void ReadSerial() {
                 currentMode = SOLIDPALETTE;
                 break;
             }
+            case 'C': {
+                Serial.println("Create");
+                memset(paletteBuffer, 0, sizeof paletteBuffer);
+                paletteColorsMade = 0;
+                currentState = CREATEPALETTECOMMAND;
+                Serial.println(String(CREATEPALETTECOMMAND));
+                Serial.println(String(currentState));
+                break;
+            }
             case 'B': {
+                Serial.println("PROBLEM: 195");
                 currentState = NUMBER;
                 ResetSerialNum(BRIGHT);
                 //Serial.println("Brightness");
                 break;
               }
             case 'd': {
+                Serial.println("PROBLEM: 202");
                 currentState = NUMBER;
                 ResetSerialNum(DELAY, THOUSANDS);
                 //Serial.println("Delay");
@@ -198,33 +221,51 @@ void ReadSerial() {
           }
           break;
         }
-      case NUMBER: {
-        ReadSerialNum(charToInt(rxChar));
-        if(currentNumState == FIN){
-          switch(serialNumPurpose){
-            case RED:
-              currentColor[0] = serialNumber;
-              break;
-            case GREEN:
-              currentColor[1] = serialNumber;
-              break;
-            case BLUE:
-              currentColor[2] = serialNumber;
-              break;
-            case BRIGHT:
-              brightness = serialNumber;
-              break;
-            case DELAY:
-              lastDelayTime = serialNumber;
-              break;
+      case CREATEPALETTECOMMAND: {
+        Serial.println("CREATEPALETTE");
+        if( paletteColorsMade < 16 ){
+          //Get another number, add it to the paletteBuffer
+          if(paletteIndexColorsMade < 3){
+            switch(rxChar){
+              case 'r': {
+                Serial.println("RedC");
+                ResetSerialNum(STORERED);
+                break;
+              }
+              case 'g': {
+                Serial.println("GreC");
+                ResetSerialNum(STOREGREEN);
+                break;
+              }
+              case 'b': {
+                Serial.println("BluC");
+                ResetSerialNum(STOREBLUE);
+                break;
+              }
+              default: {
+                Serial.println("Huh?");
+                break;
+              }
+            }
+          } else {
+            paletteIndexColorsMade = 0;
+            paletteBuffer[paletteColorsMade] = CRGB(paletteRed, paletteGreen, paletteBlue);
+            paletteColorsMade++;
+            Serial.println("indo"+String(paletteColorsMade));
           }
-          delayTime = lastDelayTime;
+        } else {
+          customPalette = CRGBPalette16(paletteBuffer[0], paletteBuffer[1], paletteBuffer[2], paletteBuffer[3], 
+                                        paletteBuffer[4], paletteBuffer[5], paletteBuffer[6], paletteBuffer[7], 
+                                        paletteBuffer[8], paletteBuffer[9], paletteBuffer[10], paletteBuffer[11],
+                                        paletteBuffer[12], paletteBuffer[13], paletteBuffer[14], paletteBuffer[15]);
+                                        
           currentState = COMMAND;
-          //Serial.println("READY:");
+          Serial.println("pado");
         }
         break;
       }
       case PALETTECOMMAND: {
+          Serial.println("PALETTE");
           switch (rxChar) {
             case 'R': {
                 currentPalette = RainbowStripeColors_p;
@@ -256,6 +297,12 @@ void ReadSerial() {
                 //Serial.println("Forest");
                 break;
               }
+            case 'C': {
+                //Go to custom palette
+                currentPalette = customPalette;
+                Serial.println("Custom");
+                break;
+            }
             default: {
                 currentPalette = RainbowColors_p;
                 //Serial.println("Rainbow");
@@ -266,6 +313,7 @@ void ReadSerial() {
           break;
         }
       case BLENDCOMMAND: {
+          Serial.println("BLEND");
           switch (rxChar) {
             case 'l': {
                 currentBlending = LINEARBLEND;
@@ -284,7 +332,62 @@ void ReadSerial() {
           //Serial.println("READY:");
           break;
         }
+      case NUMBER: {
+        Serial.println("NUMBER");
+        ReadSerialNum(charToInt(rxChar));
+        if(currentNumState == FIN){
+          switch(serialNumPurpose){
+            case STORERED:
+              paletteRed = serialNumber;
+              paletteIndexColorsMade++;
+              currentState = CREATEPALETTECOMMAND;
+              Serial.println("StoreRed");
+              break;
+            case STOREGREEN:
+              paletteGreen = serialNumber;
+              paletteIndexColorsMade++;
+              currentState = CREATEPALETTECOMMAND;
+              Serial.println("StoreGreen");
+              break;
+            case STOREBLUE:
+              paletteBlue = serialNumber;
+              paletteIndexColorsMade++;
+              currentState = CREATEPALETTECOMMAND;
+              Serial.println("StoreBlue");
+              break;
+            case RED:
+              currentColor[0] = serialNumber;
+              Serial.println("Red");
+              currentState = COMMAND;
+              break;
+            case GREEN:
+              currentColor[1] = serialNumber;
+              Serial.println("Gree");
+              currentState = COMMAND;
+              break;
+            case BLUE:
+              currentColor[2] = serialNumber;
+              Serial.println("Blue");
+              currentState = COMMAND;
+              break;
+            case BRIGHT:
+              brightness = serialNumber;
+              Serial.println("Brig");
+              currentState = COMMAND;
+              break;
+            case DELAY:
+              lastDelayTime = serialNumber;
+              Serial.println("Dela");
+              currentState = COMMAND;
+              break;
+          }
+          delayTime = lastDelayTime;
+          //Serial.println("READY:");
+        }
+        break;
+      }
     }
+    Serial.println("EndStat"+String(currentState));
   }
 }
 
