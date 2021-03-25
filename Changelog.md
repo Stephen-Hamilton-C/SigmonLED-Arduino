@@ -6,6 +6,13 @@ SigmonLED uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 [comment]: # (This is a comment, it will not be included)
 
+## [Unreleased]
+### Added
+- Ability to upload custom made palettes. See `README.md` for instructions on how to upload and show a custom palette
+### Removed
+- A bunch of debug output to serial
+
+
 ## [0.2.0] - 2021-02-15
 ### Added
 - This Changelog :)
