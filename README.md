@@ -44,6 +44,12 @@ By default, the LED mode is WS2811, so any LED strip with a WS2811 or similar ch
   - `0000` - `9999`: Set the delay to this value. Note that the number must be 4 characters long, no matter how small the number. Example: d0100 will set the delay to 100 ms, but d100 will make SigmonLED wait for one more number.
 - ``S``: Sleep. Turns off LEDs.
 - ``W``: Wake. Turns LEDs on full brightness at full white.
+- ``C``: upload a custom palette.
+  - Takes in 16 groupings of r, g, and b; each followed by a `#`.
+  - For example, each grouping is `r255g000b255#`, which would set that palette index to pink.
+  - Once the 16 groupings are fed in, add another `#` to the end to finalize the upload.
+  - See [This PasteBin](https://pastebin.com/atVPAubi) for an example custom palette string.
+  - Once the palette is uploaded, SigmonLED enters Palette mode, unless the Arduino is already in SolidPalette mode.
 
 Command example: `r127g000b255` will make all LEDs turn purple. \
 Command example: `prl` will activate the Rainbow palette with linear blending.
