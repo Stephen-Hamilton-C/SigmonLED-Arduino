@@ -380,6 +380,8 @@ void ReadSerial()
 				break;
 			}
 			}
+			currentState = COMMAND;
+			delayBypass = true;
 			break;
 		}
 		case NUMBER:
