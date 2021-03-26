@@ -1,18 +1,19 @@
 #include <FastLED.h>
 
-//I should use hexadecimal RGB
+//Make the colorIndex incremental be changable. Call it "Palette Stretch"
 
 #define LED_PIN 3
 #define NUM_LEDS 8 //300
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
-#define CMD_DELAY 0
+
+unsigned long delayStart = 0;
+bool delayBypass = false;
 
 CRGB leds[NUM_LEDS];
 int currentColor[3]{255, 255, 255};
 int brightness = 16;
-int delayTime = CMD_DELAY;
-int lastDelayTime = 0;
+int delayTime = 10;
 int serialNumber = 0;
 
 int paletteRed = 0;
@@ -160,7 +161,6 @@ void ReadSerial()
 		if (rxChar == 'x')
 		{ //Reset
 			currentState = COMMAND;
-			delayTime = lastDelayTime;
 			//Serial.println("READY:");
 			Serial.println("Reset");
 			return;
@@ -171,8 +171,6 @@ void ReadSerial()
 		case COMMAND:
 		{
 			//Serial.println("COMMAND");
-			lastDelayTime = delayTime;
-			delayTime = CMD_DELAY;
 			switch (rxChar)
 			{
 			case 'r':
@@ -245,6 +243,7 @@ void ReadSerial()
 			case 'W':
 			{
 				Wake();
+				delayBypass = true;
 				//Serial.println("Wake");
 				break;
 			}
@@ -307,6 +306,7 @@ void ReadSerial()
 					currentMode = PALETTE;
 				}
 
+				delayBypass = true;
 				currentState = COMMAND;
 				//Serial.println("pado");
 			}
@@ -389,8 +389,8 @@ void ReadSerial()
 			}
 			}
 			//currentMode = PALETTE;
+			delayBypass = true;
 			currentState = COMMAND;
-			delayTime = lastDelayTime;
 			break;
 		}
 		case NUMBER:
@@ -424,30 +424,34 @@ void ReadSerial()
 				case RED:
 					currentColor[0] = serialNumber;
 					//Serial.println("Red");
+					delayBypass = true;
 					currentState = COMMAND;
 					break;
 				case GREEN:
 					currentColor[1] = serialNumber;
 					//Serial.println("Gree");
+					delayBypass = true;
 					currentState = COMMAND;
 					break;
 				case BLUE:
 					currentColor[2] = serialNumber;
 					//Serial.println("Blue");
+					delayBypass = true;
 					currentState = COMMAND;
 					break;
 				case BRIGHT:
 					brightness = serialNumber;
 					//Serial.println("Brig");
+					delayBypass = true;
 					currentState = COMMAND;
 					break;
 				case DELAY:
-					lastDelayTime = serialNumber;
+					delayTime = serialNumber;
 					//Serial.println("Dela");
+					delayBypass = true;
 					currentState = COMMAND;
 					break;
 				}
-				delayTime = lastDelayTime;
 			}
 			break;
 		}
@@ -490,6 +494,8 @@ void setup()
 	Wake();
 	Serial.println("Setup Finished");
 	Serial.println("READY:");
+
+	delayStart = millis();
 }
 
 void loop()
@@ -500,22 +506,29 @@ void loop()
 
 	FastLED.setBrightness(brightness);
 
-	static uint8_t startIndex = 0;
-	startIndex++;
-
-	switch (currentMode)
+	//Timer Source: https://www.forward.com.au/pfod/ArduinoProgramming/TimingDelaysInArduino.html#using
+	if (delayBypass || (millis() - delayStart) >= delayTime)
 	{
-	case REDGREENBLUE:
-		RGBMode();
-		break;
-	case PALETTE:
-		PaletteMode(startIndex);
-		break;
-	case SOLIDPALETTE:
-		SolidPaletteMode(startIndex);
-		break;
-	}
+		delayStart = millis();
+		delayBypass = false;
 
-	FastLED.show();
-	FastLED.delay(delayTime);
+		static uint8_t startIndex = 0;
+		startIndex++;
+
+		switch (currentMode)
+		{
+		case REDGREENBLUE:
+			RGBMode();
+			break;
+		case PALETTE:
+			PaletteMode(startIndex);
+			break;
+		case SOLIDPALETTE:
+			SolidPaletteMode(startIndex);
+			break;
+		}
+
+		FastLED.show();
+		//FastLED.delay(delayTime);
+	}
 }
