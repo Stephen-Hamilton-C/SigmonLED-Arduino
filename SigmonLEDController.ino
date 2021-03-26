@@ -462,6 +462,7 @@ void PaletteMode(uint8_t colorIndex)
 	{
 		leds[i] = ColorFromPalette(currentPalette, colorIndex, 255, currentBlending);
 		colorIndex += 3;
+		//ColorIndex max is 16
 	}
 }
 
