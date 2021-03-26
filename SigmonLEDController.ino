@@ -62,7 +62,6 @@ SERIALNUMPURPOSE serialNumPurpose = RED;
 
 enum SERIALNUMSTATE
 {
-	THOUSANDS,
 	HUNDREDS,
 	TENS,
 	ONES,
@@ -70,21 +69,12 @@ enum SERIALNUMSTATE
 };
 SERIALNUMSTATE currentNumState = FIN;
 
-void setup()
+int hexToInt(char hexChar)
 {
-	// put your setup code here, to run once:
-	delay(3000);
-	Serial.begin(9600);
-	FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-	Wake();
-	Serial.println("Setup Finished");
-	Serial.println("READY:");
-}
-
-int charToInt(char inChar)
-{
-	switch (inChar)
+	switch (hexChar)
 	{
+	case '0':
+		return 0;
 	case '1':
 		return 1;
 	case '2':
@@ -103,39 +93,45 @@ int charToInt(char inChar)
 		return 8;
 	case '9':
 		return 9;
+	case 'A':
+		return 10;
+	case 'B':
+		return 11;
+	case 'C':
+		return 12;
+	case 'D':
+		return 13;
+	case 'E':
+		return 14;
+	case 'F':
+		return 15;
 	default:
 		return 0;
 	}
 }
 
-void ReadSerialNum(int rxInt)
+void ReadSerialHex(char hexChar)
 {
+	int rxInt = hexToInt(hexChar);
+
 	switch (currentNumState)
 	{
-	case THOUSANDS:
-		serialNumber = 1000 * rxInt;
-		currentNumState = HUNDREDS;
-		//Serial.println("Thousands: "+String(rxInt));
-		break;
 	case HUNDREDS:
-		serialNumber += 100 * rxInt;
+		serialNumber += rxInt * 256;
 		currentNumState = TENS;
-		//Serial.println("Hundreds: "+String(rxInt));
 		break;
 	case TENS:
-		serialNumber += 10 * rxInt;
+		serialNumber += rxInt * 16;
 		currentNumState = ONES;
-		//Serial.println("Tens: "+String(rxInt));
 		break;
 	case ONES:
 		serialNumber += rxInt;
 		currentNumState = FIN;
-		//Serial.println("Ones: "+String(rxInt));
 		break;
 	}
 }
 
-void ResetSerialNum(SERIALNUMPURPOSE purpose, SERIALNUMSTATE numState = HUNDREDS)
+void ResetSerialNum(SERIALNUMPURPOSE purpose, SERIALNUMSTATE numState = TENS)
 {
 	currentState = NUMBER;
 	currentNumState = numState;
@@ -217,6 +213,7 @@ void ReadSerial()
 			{
 				//Serial.println("Create");
 				memset(paletteBuffer, 0, sizeof paletteBuffer);
+				paletteIndexColorsMade = 0;
 				paletteColorsMade = 0;
 				currentState = CREATEPALETTECOMMAND;
 				Serial.println(String(CREATEPALETTECOMMAND));
@@ -233,7 +230,7 @@ void ReadSerial()
 			case 'd':
 			{
 				currentState = NUMBER;
-				ResetSerialNum(DELAY, THOUSANDS);
+				ResetSerialNum(DELAY, HUNDREDS);
 				//Serial.println("Delay");
 				break;
 			}
@@ -284,11 +281,6 @@ void ReadSerial()
 					{
 						//Serial.println("BluC");
 						ResetSerialNum(STOREBLUE);
-						break;
-					}
-					default:
-					{
-						//Serial.println("Huh?");
 						break;
 					}
 					}
@@ -404,9 +396,11 @@ void ReadSerial()
 		case NUMBER:
 		{
 			//Serial.println("NUMBER");
-			ReadSerialNum(charToInt(rxChar));
+			ReadSerialHex(rxChar);
 			if (currentNumState == FIN)
 			{
+				Serial.print("num:");
+				Serial.println(serialNumber);
 				switch (serialNumPurpose)
 				{
 				case STORERED:
@@ -487,11 +481,24 @@ void SolidPaletteMode(uint8_t colorIndex)
 	colorIndex += 1;
 }
 
+void setup()
+{
+	// put your setup code here, to run once:
+	delay(3000);
+	Serial.begin(9600);
+	FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+	Wake();
+	Serial.println("Setup Finished");
+	Serial.println("READY:");
+}
+
 void loop()
 {
 	// put your main code here, to run repeatedly:
 
 	ReadSerial();
+
+	FastLED.setBrightness(brightness);
 
 	static uint8_t startIndex = 0;
 	startIndex++;
@@ -509,7 +516,6 @@ void loop()
 		break;
 	}
 
-	FastLED.setBrightness(brightness);
 	FastLED.show();
 	FastLED.delay(delayTime);
 }
