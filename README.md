@@ -20,7 +20,7 @@ By default, the LED mode is WS2811, so any LED strip with a WS2811 or similar ch
 ## Commands
 - ``x``: Stops listening for arguments and listens for commands. Basically a "nevermind" command.
 - ``r``: Set the red channel.
-  - `000` - `255`: Set the red channel to this value. Note that the number must be 3 characters long, no matter how small the number. Example: r008 will set red channel to 8, but r8 will make SigmonLED wait for two more numbers.
+  - `00` - `FF`: Set the red channel to this value. Note that the hexadecimal number *must* be 2 characters long, no matter how small the number. Example: `r08` will set red channel to 8, but `r8` will make SigmonLED wait for one more hexadecimal number.
 - ``g``: Set the green channel.
   - See `r` for how to set the value.
 - ``b``: Set the blue channel.
@@ -33,26 +33,27 @@ By default, the LED mode is WS2811, so any LED strip with a WS2811 or similar ch
   - `o`: Ocean
   - `l`: Lava
   - `f`: Forest
-    - (Entered after palette selection)
-    - `l`: Linear blending.
-    - `n`: No blending.
 - ``P``: Enter Solid Palette mode.
   - See `p` for arguments.
+- `l`: Linear palette color blending.
+- `n`: No palette color blending.
 - ``B``: Set Brightness.
   - See `r` for how to set the value.
 - ``d``: Set Delay in ms. (applicable to Palette and Solid Palette modes)
-  - `0000` - `9999`: Set the delay to this value. Note that the number must be 4 characters long, no matter how small the number. Example: d0100 will set the delay to 100 ms, but d100 will make SigmonLED wait for one more number.
+  - `000` - `FFF`: Set the delay to this value. Note that the number must be 3 characters long, no matter how small the number. Example: `d0AF` will set the delay to 175 ms, but `dAF` will make SigmonLED wait for one more number.
 - ``S``: Sleep. Turns off LEDs.
 - ``W``: Wake. Turns LEDs on full brightness at full white.
 - ``C``: upload a custom palette.
   - Takes in 16 groupings of r, g, and b; each followed by a `#`.
-  - For example, each grouping is `r255g000b255#`, which would set that palette index to pink.
+  - For example, each grouping is `rFFg00bFF#`, which would set that palette index to pink.
   - Once the 16 groupings are fed in, add another `#` to the end to finalize the upload.
-  - See [This PasteBin](https://pastebin.com/atVPAubi) for an example custom palette string.
+  - See [This PasteBin](https://pastebin.com/Wz3fSjUW) for an example custom palette string.
   - Once the palette is uploaded, SigmonLED enters Palette mode, unless the Arduino is already in SolidPalette mode.
 
-Command example: `r127g000b255` will make all LEDs turn purple. \
+Command example: `r7Fg00b7F` will make all LEDs turn purple. \
 Command example: `prl` will activate the Rainbow palette with linear blending.
+
+Note that *all* hexadecimal numbers must use **capital letters**. Sending `rff` will decode as 0, but sending `rFF` will decode as 255.
 
 ## Licensed
 SigmonLED is licensed under the GNU General Public License v3.0. You can find the license details in the `LICENSE` file in the main branch. Feel free to repurpose, redistribute, and branch off this code anytime :D
