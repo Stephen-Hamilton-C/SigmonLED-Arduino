@@ -461,7 +461,7 @@ void PaletteMode(uint8_t colorIndex)
 	for (int i = 0; i < NUM_LEDS; i++)
 	{
 		leds[i] = ColorFromPalette(currentPalette, colorIndex, 255, currentBlending);
-		colorIndex += 16;
+		colorIndex += 3;
 	}
 }
 
