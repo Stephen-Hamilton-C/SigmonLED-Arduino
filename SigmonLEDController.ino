@@ -43,7 +43,6 @@ enum SERIALSTATE
 	DELAYCOMMAND,
 	PALETTECOMMAND,
 	CREATEPALETTECOMMAND,
-	BLENDCOMMAND,
 	NUMBER
 };
 SERIALSTATE currentState = COMMAND;
@@ -207,6 +206,20 @@ void ReadSerial()
 				currentMode = SOLIDPALETTE;
 				break;
 			}
+			case 'l':
+			{
+				currentBlending = LINEARBLEND;
+				delayBypass = true;
+				//Serial.println("Linear Blend");
+				break;
+			}
+			case 'n':
+			{
+				currentBlending = NOBLEND;
+				delayBypass = true;
+				//Serial.println("No Blend");
+				break;
+			}
 			case 'C':
 			{
 				//Serial.println("Create");
@@ -367,30 +380,6 @@ void ReadSerial()
 				break;
 			}
 			}
-			currentState = BLENDCOMMAND;
-			break;
-		}
-		case BLENDCOMMAND:
-		{
-			//Serial.println("BLEND");
-			switch (rxChar)
-			{
-			case 'l':
-			{
-				currentBlending = LINEARBLEND;
-				//Serial.println("Linear Blend");
-				break;
-			}
-			default:
-			{
-				currentBlending = NOBLEND;
-				//Serial.println("No Blend");
-				break;
-			}
-			}
-			//currentMode = PALETTE;
-			delayBypass = true;
-			currentState = COMMAND;
 			break;
 		}
 		case NUMBER:
@@ -472,7 +461,7 @@ void PaletteMode(uint8_t colorIndex)
 	for (int i = 0; i < NUM_LEDS; i++)
 	{
 		leds[i] = ColorFromPalette(currentPalette, colorIndex, 255, currentBlending);
-		colorIndex += 3;
+		colorIndex += 16;
 	}
 }
 
