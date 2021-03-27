@@ -27,6 +27,8 @@ CRGBPalette16 customPalette;
 CRGBPalette16 currentPalette;
 TBlendType currentBlending;
 
+int paletteStretch = 3;
+
 enum MODE
 {
 	REDGREENBLUE,
@@ -56,7 +58,8 @@ enum SERIALNUMPURPOSE
 	GREEN,
 	BLUE,
 	BRIGHT,
-	DELAY
+	DELAY,
+	STRETCH
 };
 SERIALNUMPURPOSE serialNumPurpose = RED;
 
@@ -193,6 +196,14 @@ void ReadSerial()
 				//Serial.println("Blue");
 				break;
 			}
+			case 's':
+			{
+				//Palette Stretch (color index increase per loop)
+				//Take in only one HEX char. Set the incremental to the received number plus one
+				//The range of the incremental is 1 - 16, an F is 15
+				ResetSerialNum(STRETCH, ONES);
+				break;
+			}
 			case 'p':
 			{
 				currentState = PALETTECOMMAND;
@@ -233,14 +244,12 @@ void ReadSerial()
 			}
 			case 'B':
 			{
-				currentState = NUMBER;
 				ResetSerialNum(BRIGHT);
 				//Serial.println("Brightness");
 				break;
 			}
 			case 'd':
 			{
-				currentState = NUMBER;
 				ResetSerialNum(DELAY, HUNDREDS);
 				//Serial.println("Delay");
 				break;
@@ -442,6 +451,10 @@ void ReadSerial()
 					delayBypass = true;
 					currentState = COMMAND;
 					break;
+				case STRETCH:
+					paletteStretch = serialNumber+1;
+					delayBypass = true;
+					currentState = COMMAND;
 				}
 			}
 			break;
@@ -463,7 +476,7 @@ void PaletteMode(uint8_t colorIndex)
 	for (int i = 0; i < NUM_LEDS; i++)
 	{
 		leds[i] = ColorFromPalette(currentPalette, colorIndex, 255, currentBlending);
-		colorIndex += 3;
+		colorIndex += paletteStretch;
 		//ColorIndex max is 16
 	}
 }
