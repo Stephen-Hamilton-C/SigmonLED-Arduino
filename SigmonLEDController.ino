@@ -201,6 +201,7 @@ void ReadSerial()
 				//Palette Stretch (color index increase per loop)
 				//Take in only one HEX char. Set the incremental to the received number plus one
 				//The range of the incremental is 1 - 16, an F is 15
+        Serial.println("stretch");
 				ResetSerialNum(STRETCH, ONES);
 				break;
 			}
@@ -339,55 +340,55 @@ void ReadSerial()
 			Serial.println("PALETTE");
 			switch (rxChar)
 			{
-			case 'R':
-			{
-				currentPalette = RainbowStripeColors_p;
-				//Serial.println("RainbowStripe");
-				break;
-			}
-			case 'c':
-			{
-				currentPalette = CloudColors_p;
-				//Serial.println("Cloud");
-				break;
-			}
-			case 'p':
-			{
-				currentPalette = PartyColors_p;
-				//Serial.println("Party");
-				break;
-			}
-			case 'o':
-			{
-				currentPalette = OceanColors_p;
-				//Serial.println("Ocean");
-				break;
-			}
-			case 'l':
-			{
-				currentPalette = LavaColors_p;
-				//Serial.println("Lava");
-				break;
-			}
-			case 'f':
-			{
-				currentPalette = ForestColors_p;
-				//Serial.println("Forest");
-				break;
-			}
-			case 'C':
-			{
-				//Go to custom palette
-				currentPalette = customPalette;
-				//Serial.println("Custom");
-				break;
-			}
-			default:
-			{
-				currentPalette = RainbowColors_p;
-				//Serial.println("Rainbow");
-				break;
-			}
+  			case 'R':
+  			{
+  				currentPalette = RainbowStripeColors_p;
+  				//Serial.println("RainbowStripe");
+  				break;
+  			}
+  			case 'c':
+  			{
+  				currentPalette = CloudColors_p;
+  				//Serial.println("Cloud");
+  				break;
+  			}
+  			case 'p':
+  			{
+  				currentPalette = PartyColors_p;
+  				//Serial.println("Party");
+  				break;
+  			}
+  			case 'o':
+  			{
+  				currentPalette = OceanColors_p;
+  				//Serial.println("Ocean");
+  				break;
+  			}
+  			case 'l':
+  			{
+  				currentPalette = LavaColors_p;
+  				//Serial.println("Lava");
+  				break;
+  			}
+  			case 'f':
+  			{
+  				currentPalette = ForestColors_p;
+  				//Serial.println("Forest");
+  				break;
+  			}
+  			case 'C':
+  			{
+  				//Go to custom palette
+  				currentPalette = customPalette;
+  				//Serial.println("Custom");
+  				break;
+  			}
+  			default:
+  			{
+  				currentPalette = RainbowColors_p;
+  				//Serial.println("Rainbow");
+  				break;
+  			}
 			}
 			currentState = COMMAND;
 			delayBypass = true;
@@ -453,6 +454,8 @@ void ReadSerial()
 					break;
 				case STRETCH:
 					paletteStretch = serialNumber+1;
+          Serial.print("stretch");
+          Serial.println(paletteStretch);
 					delayBypass = true;
 					currentState = COMMAND;
 				}
