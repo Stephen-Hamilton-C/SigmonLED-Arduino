@@ -1,9 +1,7 @@
 #include <FastLED.h>
 
-//Make the colorIndex incremental be changable. Call it "Palette Stretch"
-
 #define LED_PIN 3
-#define NUM_LEDS 8 //300
+#define NUM_LEDS 300 //8
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 
