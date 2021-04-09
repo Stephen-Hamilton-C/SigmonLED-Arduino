@@ -33,6 +33,7 @@ By default, the LED mode is WS2811, so any LED strip with a WS2811 or similar ch
   - `o`: Ocean
   - `l`: Lava
   - `f`: Forest
+  - `C`: Currently loaded custom palette
 - ``P``: Enter Solid Palette mode.
   - See `p` for arguments.
 - `l`: Linear palette color blending.
