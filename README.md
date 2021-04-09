@@ -49,6 +49,8 @@ By default, the LED mode is WS2811, so any LED strip with a WS2811 or similar ch
   - Once the 16 groupings are fed in, add another `#` to the end to finalize the upload.
   - See [This PasteBin](https://pastebin.com/Wz3fSjUW) for an example custom palette string.
   - Once the palette is uploaded, SigmonLED enters Palette mode, unless the Arduino is already in SolidPalette mode.
+- ``s``: Set Palette Stretch. This changes how many LEDs a palette can span, with higher numbers being less LEDs. 
+  - Takes a single hexadecimal character. e.g. `sF` sets palette stretching to 16.
 
 Command example: `r7Fg00b7F` will make all LEDs turn purple. \
 Command example: `prl` will activate the Rainbow palette with linear blending.
