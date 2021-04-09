@@ -6,7 +6,7 @@ SigmonLED uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 [comment]: # (This is a comment, it will not be included)
 
-## [0.4.0]
+## [0.4.0] - 2021-04-09
 ### Added
 - Palette Stretch setting. use s# to change (where # is a single-digit hexadecimal number)
 
