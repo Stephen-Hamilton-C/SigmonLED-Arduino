@@ -118,7 +118,7 @@ SERIALNUMSTATE currentNumState = FIN;
 /**
  * @brief Converts a hexadecimal character to an integer
  */
-int hexToInt(char hexChar) {
+int hexToInt(char& hexChar) {
 	switch (hexChar) {
 		case '0': return 0;
 		case '1': return 1;
@@ -145,7 +145,7 @@ int hexToInt(char hexChar) {
  * 
  * @param hexChar The next hexadecimal number that came in
  */
-void ReadSerialHex(char hexChar) {
+void ReadSerialHex(char& hexChar) {
 	uint8_t rxInt = hexToInt(hexChar);
 
 	switch (currentNumState) {
@@ -190,6 +190,250 @@ void Wake() {
 	brightness = 255;
 }
 
+void handleCommand(char& rxChar){
+	switch (rxChar) {
+		//Go into static color mode and set the red channel
+		case 'r': {
+			currentMode = REDGREENBLUE;
+			ResetSerialNum(RED);
+			break;
+		}
+		//Go into static color mode and set the green channel
+		case 'g': {
+			currentMode = REDGREENBLUE;
+			ResetSerialNum(GREEN);
+			break;
+		}
+		//Go into static color mode and set the blue channel
+		case 'b': {
+			currentMode = REDGREENBLUE;
+			ResetSerialNum(BLUE);
+			break;
+		}
+		//Set the paletteStretch setting
+		case 's': {
+			//Palette Stretch (color index increase per loop)
+			//Take in only one HEX char. Set the incremental to the received number plus one
+			//The range of the incremental is 1 - 16, an F is 15
+			ResetSerialNum(STRETCH, ONES);
+			break;
+		}
+		//Go into palette mode and listen for arguments
+		case 'p': {
+			currentState = PALETTECOMMAND;
+			currentMode = PALETTE;
+			break;
+		}
+		//Go into solid palette mode and listen for arguments
+		case 'P': {
+			currentState = PALETTECOMMAND;
+			currentMode = SOLIDPALETTE;
+			break;
+		}
+		//Set the blending setting to LINEARBLEND
+		case 'l': {
+			currentBlending = LINEARBLEND;
+			delayBypass = true;
+			break;
+		}
+		//Set the blending setting to NOBLEND
+		case 'n': {
+			currentBlending = NOBLEND;
+			delayBypass = true;
+			break;
+		}
+		//Prepare to receive a custom palette
+		case 'C': {
+			memset(paletteBuffer, 0, sizeof paletteBuffer);
+			paletteIndexColorsMade = 0;
+			paletteColorsMade = 0;
+			currentState = CREATEPALETTECOMMAND;
+			break;
+		}
+		//Set the brightness
+		case 'B': {
+			ResetSerialNum(BRIGHT);
+			break;
+		}
+		//Set the delay
+		case 'd': {
+			ResetSerialNum(DELAY, HUNDREDS);
+			break;
+		}
+		//Go to sleep
+		case 'S': {
+			delayTime = 10;
+			brightness = 0;
+			currentMode = SLEEP;
+			break;
+		}
+		//Wake up
+		case 'W': {
+			Wake();
+			delayBypass = true;
+			break;
+		}
+		//Unable to recognize command
+		default:
+			Serial.print("Unrecognized Command: ");
+			Serial.println(rxChar);
+			break;
+	}
+}
+
+/**
+ * @brief Receive arguments for creating a palette
+ */
+void handleCreatePaletteArgs(char& rxChar){
+	//If not all colors are received
+	if (paletteColorsMade < 16) {
+		//Get another number, add it to the paletteBuffer
+		if (paletteIndexColorsMade < 3) {
+			switch (rxChar) {
+				case 'r': {
+					//Prepare to store next number to red channel
+					ResetSerialNum(STORERED);
+					break;
+				}
+				case 'g': {
+					//Prepare to store next number to green channel
+					ResetSerialNum(STOREGREEN);
+					break;
+				}
+				case 'b': {
+					//Prepare to store next number to blue channel
+					ResetSerialNum(STOREBLUE);
+					break;
+				}
+			}
+		} else {
+			//All colors received, store this set into buffer
+			paletteIndexColorsMade = 0;
+			paletteBuffer[paletteColorsMade] = CRGB(paletteRed, paletteGreen, paletteBlue);
+			paletteColorsMade++;
+		}
+	} else {
+		//All colors have been received, create the custom palette
+		customPalette = CRGBPalette16(paletteBuffer[0], paletteBuffer[1], paletteBuffer[2], paletteBuffer[3],
+									paletteBuffer[4], paletteBuffer[5], paletteBuffer[6], paletteBuffer[7],
+									paletteBuffer[8], paletteBuffer[9], paletteBuffer[10], paletteBuffer[11],
+									paletteBuffer[12], paletteBuffer[13], paletteBuffer[14], paletteBuffer[15]);
+
+		//Update currentPalete to be the new customPalette. If we are not in SolidPaletteMode, then set current mode to Palette mode
+		currentPalette = customPalette;
+		if (currentMode != SOLIDPALETTE) {
+			currentMode = PALETTE;
+		}
+
+		delayBypass = true;
+		currentState = COMMAND;
+	}
+}
+
+/**
+ * @brief Receive arguments for palette mode (which palette to select)
+ */
+void handlePaletteArgs(char& rxChar){
+	switch (rxChar) {
+		//Rainbox stripe
+		case 'R':
+			currentPalette = RainbowStripeColors_p;
+			break;
+		//Cloud
+		case 'c':
+			currentPalette = CloudColors_p;
+			break;
+		//Party
+		case 'p':
+			currentPalette = PartyColors_p;
+			break;
+		//Ocean
+		case 'o':
+			currentPalette = OceanColors_p;
+			break;
+		//Lava
+		case 'l':
+			currentPalette = LavaColors_p;
+			break;
+		//Forest
+		case 'f':
+			currentPalette = ForestColors_p;
+			break;
+		//Currently stored custom palette
+		case 'C':
+			currentPalette = customPalette;
+			break;
+		//Rainbow
+		default:
+			currentPalette = RainbowColors_p;
+			break;
+	}
+	currentState = COMMAND;
+	delayBypass = true;
+}
+
+/**
+ * @brief Acts on a fully complete serialNumber
+ */
+void storeFinishedNumber(){
+	switch (serialNumPurpose) {
+		//Store the number as the red channel for a custom palette
+		case STORERED:
+			paletteRed = serialNumber;
+			paletteIndexColorsMade++;
+			currentState = CREATEPALETTECOMMAND;
+			break;
+		//Store the number as the green channel for a custom palette
+		case STOREGREEN:
+			paletteGreen = serialNumber;
+			paletteIndexColorsMade++;
+			currentState = CREATEPALETTECOMMAND;
+			break;
+		//Store the number as the blue channel for a custom palette
+		case STOREBLUE:
+			paletteBlue = serialNumber;
+			paletteIndexColorsMade++;
+			currentState = CREATEPALETTECOMMAND;
+			break;
+		//Store the number as the red channel for static color mode
+		case RED:
+			currentColor[0] = serialNumber;
+			delayBypass = true;
+			currentState = COMMAND;
+			break;
+		//Store the number as the green channel for static color mode
+		case GREEN:
+			currentColor[1] = serialNumber;
+			delayBypass = true;
+			currentState = COMMAND;
+			break;
+		//Store the number as the blue channel for static color mode
+		case BLUE:
+			currentColor[2] = serialNumber;
+			delayBypass = true;
+			currentState = COMMAND;
+			break;
+		//Use the number for setting the brightness
+		case BRIGHT:
+			brightness = serialNumber;
+			delayBypass = true;
+			currentState = COMMAND;
+			break;
+		//Use the number for setting the delay
+		case DELAY:
+			delayTime = serialNumber;
+			delayBypass = true;
+			currentState = COMMAND;
+			break;
+		//Use the number for setting the palette stretching
+		case STRETCH:
+			paletteStretch = serialNumber + 1;
+			delayBypass = true;
+			currentState = COMMAND;
+			break;
+	}
+}
+
 /**
  * @brief Processes the next serial character if available
  */
@@ -205,181 +449,17 @@ void ReadSerial() {
 
 		switch (currentState) {
 			case COMMAND: {
-				switch (rxChar) {
-					//Go into static color mode and set the red channel
-					case 'r': {
-						currentMode = REDGREENBLUE;
-						ResetSerialNum(RED);
-						break;
-					}
-					//Go into static color mode and set the green channel
-					case 'g': {
-						currentMode = REDGREENBLUE;
-						ResetSerialNum(GREEN);
-						break;
-					}
-					//Go into static color mode and set the blue channel
-					case 'b': {
-						currentMode = REDGREENBLUE;
-						ResetSerialNum(BLUE);
-						break;
-					}
-					//Set the paletteStretch setting
-					case 's': {
-						//Palette Stretch (color index increase per loop)
-						//Take in only one HEX char. Set the incremental to the received number plus one
-						//The range of the incremental is 1 - 16, an F is 15
-						ResetSerialNum(STRETCH, ONES);
-						break;
-					}
-					//Go into palette mode and listen for arguments
-					case 'p': {
-						currentState = PALETTECOMMAND;
-						currentMode = PALETTE;
-						break;
-					}
-					//Go into solid palette mode and listen for arguments
-					case 'P': {
-						currentState = PALETTECOMMAND;
-						currentMode = SOLIDPALETTE;
-						break;
-					}
-					//Set the blending setting to LINEARBLEND
-					case 'l': {
-						currentBlending = LINEARBLEND;
-						delayBypass = true;
-						break;
-					}
-					//Set the blending setting to NOBLEND
-					case 'n': {
-						currentBlending = NOBLEND;
-						delayBypass = true;
-						break;
-					}
-					//Prepare to receive a custom palette
-					case 'C': {
-						memset(paletteBuffer, 0, sizeof paletteBuffer);
-						paletteIndexColorsMade = 0;
-						paletteColorsMade = 0;
-						currentState = CREATEPALETTECOMMAND;
-						break;
-					}
-					//Set the brightness
-					case 'B': {
-						ResetSerialNum(BRIGHT);
-						break;
-					}
-					//Set the delay
-					case 'd': {
-						ResetSerialNum(DELAY, HUNDREDS);
-						break;
-					}
-					//Go to sleep
-					case 'S': {
-						delayTime = 10;
-						brightness = 0;
-						currentMode = SLEEP;
-						break;
-					}
-					//Wake up
-					case 'W': {
-						Wake();
-						delayBypass = true;
-						break;
-					}
-					//Unable to recognize command
-					default:
-						Serial.print("Unrecognized Command: ");
-						Serial.println(rxChar);
-						break;
-				}
+				handleCommand(rxChar);
 				break;
 			}
 			//Receive arguments for creating a palette
 			case CREATEPALETTECOMMAND: {
-				//If not all colors are received
-				if (paletteColorsMade < 16) {
-					//Get another number, add it to the paletteBuffer
-					if (paletteIndexColorsMade < 3) {
-						switch (rxChar) {
-							case 'r': {
-								//Prepare to store next number to red channel
-								ResetSerialNum(STORERED);
-								break;
-							}
-							case 'g': {
-								//Prepare to store next number to green channel
-								ResetSerialNum(STOREGREEN);
-								break;
-							}
-							case 'b': {
-								//Prepare to store next number to blue channel
-								ResetSerialNum(STOREBLUE);
-								break;
-							}
-						}
-					} else {
-						//All colors received, store this set into buffer
-						paletteIndexColorsMade = 0;
-						paletteBuffer[paletteColorsMade] = CRGB(paletteRed, paletteGreen, paletteBlue);
-						paletteColorsMade++;
-					}
-				} else {
-					//All colors have been received, create the custom palette
-					customPalette = CRGBPalette16(paletteBuffer[0], paletteBuffer[1], paletteBuffer[2], paletteBuffer[3],
-												paletteBuffer[4], paletteBuffer[5], paletteBuffer[6], paletteBuffer[7],
-												paletteBuffer[8], paletteBuffer[9], paletteBuffer[10], paletteBuffer[11],
-												paletteBuffer[12], paletteBuffer[13], paletteBuffer[14], paletteBuffer[15]);
-
-					//Update currentPalete to be the new customPalette. If we are not in SolidPaletteMode, then set current mode to Palette mode
-					currentPalette = customPalette;
-					if (currentMode != SOLIDPALETTE) {
-						currentMode = PALETTE;
-					}
-
-					delayBypass = true;
-					currentState = COMMAND;
-				}
+				handleCreatePaletteArgs(rxChar);
 				break;
 			}
 			//Receive arguments for palette mode (which palette to select)
 			case PALETTECOMMAND: {
-				switch (rxChar) {
-					//Rainbox stripe
-					case 'R':
-						currentPalette = RainbowStripeColors_p;
-						break;
-					//Cloud
-					case 'c':
-						currentPalette = CloudColors_p;
-						break;
-					//Party
-					case 'p':
-						currentPalette = PartyColors_p;
-						break;
-					//Ocean
-					case 'o':
-						currentPalette = OceanColors_p;
-						break;
-					//Lava
-					case 'l':
-						currentPalette = LavaColors_p;
-						break;
-					//Forest
-					case 'f':
-						currentPalette = ForestColors_p;
-						break;
-					//Currently stored custom palette
-					case 'C':
-						currentPalette = customPalette;
-						break;
-					//Rainbow
-					default:
-						currentPalette = RainbowColors_p;
-						break;
-				}
-				currentState = COMMAND;
-				delayBypass = true;
+				handlePaletteArgs(rxChar);
 				break;
 			}
 			//Receive a number
@@ -388,61 +468,7 @@ void ReadSerial() {
 
 				//If done reading the current number
 				if (currentNumState == FIN) {
-					switch (serialNumPurpose) {
-						//Store the number as the red channel for a custom palette
-						case STORERED:
-							paletteRed = serialNumber;
-							paletteIndexColorsMade++;
-							currentState = CREATEPALETTECOMMAND;
-							break;
-						//Store the number as the green channel for a custom palette
-						case STOREGREEN:
-							paletteGreen = serialNumber;
-							paletteIndexColorsMade++;
-							currentState = CREATEPALETTECOMMAND;
-							break;
-						//Store the number as the blue channel for a custom palette
-						case STOREBLUE:
-							paletteBlue = serialNumber;
-							paletteIndexColorsMade++;
-							currentState = CREATEPALETTECOMMAND;
-							break;
-						//Store the number as the red channel for static color mode
-						case RED:
-							currentColor[0] = serialNumber;
-							delayBypass = true;
-							currentState = COMMAND;
-							break;
-						//Store the number as the green channel for static color mode
-						case GREEN:
-							currentColor[1] = serialNumber;
-							delayBypass = true;
-							currentState = COMMAND;
-							break;
-						//Store the number as the blue channel for static color mode
-						case BLUE:
-							currentColor[2] = serialNumber;
-							delayBypass = true;
-							currentState = COMMAND;
-							break;
-						//Use the number for setting the brightness
-						case BRIGHT:
-							brightness = serialNumber;
-							delayBypass = true;
-							currentState = COMMAND;
-							break;
-						//Use the number for setting the delay
-						case DELAY:
-							delayTime = serialNumber;
-							delayBypass = true;
-							currentState = COMMAND;
-							break;
-						//Use the number for setting the palette stretching
-						case STRETCH:
-							paletteStretch = serialNumber + 1;
-							delayBypass = true;
-							currentState = COMMAND;
-					}
+					storeFinishedNumber();
 				}
 				break;
 			}
