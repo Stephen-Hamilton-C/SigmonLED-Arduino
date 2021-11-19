@@ -1,4 +1,5 @@
 #include <FastLED.h>
+#include <SoftwareSerial.h>
 
 //Constants
 #define LED_PIN 3
@@ -190,8 +191,16 @@ void Wake() {
 	brightness = 255;
 }
 
+void disconnect(){
+	Serial.write("AT");
+}
+
 void handleCommand(char& rxChar){
 	switch (rxChar) {
+		case 'D': {
+			disconnect();
+			break;
+		}
 		//Go into static color mode and set the red channel
 		case 'r': {
 			currentMode = REDGREENBLUE;
@@ -274,10 +283,9 @@ void handleCommand(char& rxChar){
 			break;
 		}
 		//Unable to recognize command
-		default:
-			Serial.print("Unrecognized Command: ");
-			Serial.println(rxChar);
-			break;
+		// default:
+		 	// Debug statments if needed
+		// 	break;
 	}
 }
 
@@ -512,11 +520,13 @@ void SolidPaletteMode(uint8_t colorIndex) {
  */
 void setup() {
 	delay(3000); //Wait 3 seconds so everything has time to power up
-	//Init bluetooth receive and LEDs
+	//Init bluetooth and LEDs
 	Serial.begin(9600);
 	FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
 	Wake();
-	Serial.println("READY:");
+
+	pinMode(LED_BUILTIN, OUTPUT);
+	digitalWrite(LED_BUILTIN, LOW);
 
 	//Start timers
 	delayStart = millis();
