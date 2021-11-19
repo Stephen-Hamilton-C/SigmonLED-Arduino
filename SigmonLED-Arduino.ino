@@ -1,18 +1,25 @@
 #include <FastLED.h>
-#include <SoftwareSerial.h>
 
 //Constants
 #define LED_PIN 3
 #define NUM_LEDS 8 //300
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
+#define CONN_TIMEOUT 180000 //Automatically disconnect after 3 minutes of inactivity
 
 //Timer
+unsigned long connTimer = 0;
 unsigned long delayStart = 0;
 /**
  * @brief Ignores the next delay on the mode state machine. This allows setting changes to instantly take effect
  */
 bool delayBypass = false;
+
+/**
+ * @brief May not be accurate, is set to true when communication is made with device, and then set to false after disconnect timeout.
+ * Device may have disconnected while this is set to true. This is only used to reduce repeated communication with BT module.
+ */
+bool connected = false;
 
 //LED settings
 CRGB leds[NUM_LEDS];
@@ -191,16 +198,8 @@ void Wake() {
 	brightness = 255;
 }
 
-void disconnect(){
-	Serial.write("AT");
-}
-
 void handleCommand(char& rxChar){
 	switch (rxChar) {
-		case 'D': {
-			disconnect();
-			break;
-		}
 		//Go into static color mode and set the red channel
 		case 'r': {
 			currentMode = REDGREENBLUE;
@@ -447,6 +446,7 @@ void storeFinishedNumber(){
  */
 void ReadSerial() {
 	if (Serial.available()) {
+		resetTimeout();
 		char rxChar = Serial.read();
 
 		//Ignore what may have been said and listen to commands
@@ -515,6 +515,16 @@ void SolidPaletteMode(uint8_t colorIndex) {
 	colorIndex += paletteStretch;
 }
 
+void resetTimeout(){
+	connTimer = millis();
+	connected = true;
+}
+
+void disconnect(){
+	Serial.write("AT");
+	connected = false;
+}
+
 /**
  * @brief Arduino function that runs at startup
  */
@@ -534,7 +544,6 @@ void setup() {
 
 /**
  * @brief Arduino function that runs repeatedly
- * 
  */
 void loop() {
 	//Read commands
@@ -568,5 +577,11 @@ void loop() {
 
 		//Update the LED strip
 		FastLED.show();
+	}
+
+	//Automatically disconnect from bluetooth device if no communication for a time defined by CONN_TIMEOUT
+	if(connected && (millis() - connTimer) >= CONN_TIMEOUT) {
+		resetTimeout();
+		disconnect();
 	}
 }
