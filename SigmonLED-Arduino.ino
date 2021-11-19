@@ -1,10 +1,16 @@
 #include <FastLED.h>
+#include <SoftwareSerial.h>
 
 //Constants
 #define LED_PIN 3
 #define NUM_LEDS 8 //300
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
+#define SERIAL_RX 4
+#define SERIAL_TX 5
+#define DEBUG 1
+
+SoftwareSerial BTSerial(SERIAL_RX, SERIAL_TX);
 
 //Timer
 unsigned long delayStart = 0;
@@ -175,6 +181,10 @@ void ResetSerialNum(SERIALNUMPURPOSE purpose, SERIALNUMSTATE numState = TENS) {
 	currentNumState = numState;
 	serialNumber = 0;
 	serialNumPurpose = purpose;
+	debug("getting number, enums: ");
+	debug(purpose);
+	debug(", ");
+	debugln(numState);
 }
 
 /**
@@ -275,8 +285,8 @@ void handleCommand(char& rxChar){
 		}
 		//Unable to recognize command
 		default:
-			Serial.print("Unrecognized Command: ");
-			Serial.println(rxChar);
+			debug("Unrecognized Command: ");
+			debugln(rxChar);
 			break;
 	}
 }
@@ -287,8 +297,12 @@ void handleCommand(char& rxChar){
 void handleCreatePaletteArgs(char& rxChar){
 	//If not all colors are received
 	if (paletteColorsMade < 16) {
+		debugln("need colors");
 		//Get another number, add it to the paletteBuffer
 		if (paletteIndexColorsMade < 3) {
+			debugln("have ");
+			debug(paletteIndexColorsMade);
+			debugln(" channels");
 			switch (rxChar) {
 				case 'r': {
 					//Prepare to store next number to red channel
@@ -311,8 +325,10 @@ void handleCreatePaletteArgs(char& rxChar){
 			paletteIndexColorsMade = 0;
 			paletteBuffer[paletteColorsMade] = CRGB(paletteRed, paletteGreen, paletteBlue);
 			paletteColorsMade++;
+			debugln("next color");
 		}
 	} else {
+		debugln("all colors rx");
 		//All colors have been received, create the custom palette
 		customPalette = CRGBPalette16(paletteBuffer[0], paletteBuffer[1], paletteBuffer[2], paletteBuffer[3],
 									paletteBuffer[4], paletteBuffer[5], paletteBuffer[6], paletteBuffer[7],
@@ -338,34 +354,42 @@ void handlePaletteArgs(char& rxChar){
 		//Rainbox stripe
 		case 'R':
 			currentPalette = RainbowStripeColors_p;
+			debugln("rainboxstripe");
 			break;
 		//Cloud
 		case 'c':
 			currentPalette = CloudColors_p;
+			debugln("cloud");
 			break;
 		//Party
 		case 'p':
 			currentPalette = PartyColors_p;
+			debugln("party");
 			break;
 		//Ocean
 		case 'o':
 			currentPalette = OceanColors_p;
+			debugln("ocean");
 			break;
 		//Lava
 		case 'l':
 			currentPalette = LavaColors_p;
+			debugln("lava");
 			break;
 		//Forest
 		case 'f':
 			currentPalette = ForestColors_p;
+			debugln("forest");
 			break;
 		//Currently stored custom palette
 		case 'C':
 			currentPalette = customPalette;
+			debugln("custom");
 			break;
 		//Rainbow
 		default:
 			currentPalette = RainbowColors_p;
+			debugln("rainbow");
 			break;
 	}
 	currentState = COMMAND;
@@ -382,54 +406,63 @@ void storeFinishedNumber(){
 			paletteRed = serialNumber;
 			paletteIndexColorsMade++;
 			currentState = CREATEPALETTECOMMAND;
+			debugln("createpalettecmdR");
 			break;
 		//Store the number as the green channel for a custom palette
 		case STOREGREEN:
 			paletteGreen = serialNumber;
 			paletteIndexColorsMade++;
 			currentState = CREATEPALETTECOMMAND;
+			debugln("createpalettecmdG");
 			break;
 		//Store the number as the blue channel for a custom palette
 		case STOREBLUE:
 			paletteBlue = serialNumber;
 			paletteIndexColorsMade++;
 			currentState = CREATEPALETTECOMMAND;
+			debugln("createpalettecmdB");
 			break;
 		//Store the number as the red channel for static color mode
 		case RED:
 			currentColor[0] = serialNumber;
 			delayBypass = true;
 			currentState = COMMAND;
+			debugln("red");
 			break;
 		//Store the number as the green channel for static color mode
 		case GREEN:
 			currentColor[1] = serialNumber;
 			delayBypass = true;
 			currentState = COMMAND;
+			debugln("green");
 			break;
 		//Store the number as the blue channel for static color mode
 		case BLUE:
 			currentColor[2] = serialNumber;
 			delayBypass = true;
 			currentState = COMMAND;
+			debugln("blue");
 			break;
 		//Use the number for setting the brightness
 		case BRIGHT:
 			brightness = serialNumber;
 			delayBypass = true;
 			currentState = COMMAND;
+			debugln("brightness");
 			break;
 		//Use the number for setting the delay
 		case DELAY:
 			delayTime = serialNumber;
 			delayBypass = true;
 			currentState = COMMAND;
+			debugln("delay");
 			break;
 		//Use the number for setting the palette stretching
 		case STRETCH:
 			paletteStretch = serialNumber + 1;
 			delayBypass = true;
 			currentState = COMMAND;
+			debugln("stretch");
 			break;
 	}
 }
@@ -438,27 +471,34 @@ void storeFinishedNumber(){
  * @brief Processes the next serial character if available
  */
 void ReadSerial() {
-	if (Serial.available()) {
-		char rxChar = Serial.read();
+	if (BTSerial.available()) {
+		char rxChar = BTSerial.read();
 
 		//Ignore what may have been said and listen to commands
 		if (rxChar == 'x') {
+			debugln("ESCAPING");
 			currentState = COMMAND;
 			return;
 		}
 
 		switch (currentState) {
 			case COMMAND: {
+				debug("Handling command: ");
+				debugln(rxChar);
 				handleCommand(rxChar);
 				break;
 			}
 			//Receive arguments for creating a palette
 			case CREATEPALETTECOMMAND: {
+				debug("Handling create palette arg: ");
+				debugln(rxChar);
 				handleCreatePaletteArgs(rxChar);
 				break;
 			}
 			//Receive arguments for palette mode (which palette to select)
 			case PALETTECOMMAND: {
+				debug("Handling palette arg: ");
+				debugln(rxChar);
 				handlePaletteArgs(rxChar);
 				break;
 			}
@@ -468,6 +508,8 @@ void ReadSerial() {
 
 				//If done reading the current number
 				if (currentNumState == FIN) {
+					debug("Finished reading number: ");
+					debugln(serialNumber);
 					storeFinishedNumber();
 				}
 				break;
@@ -512,11 +554,14 @@ void SolidPaletteMode(uint8_t colorIndex) {
  */
 void setup() {
 	delay(3000); //Wait 3 seconds so everything has time to power up
-	//Init bluetooth receive and LEDs
-	Serial.begin(9600);
+	//Init bluetooth and LEDs
+	BTSerial.begin(9600);
 	FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
 	Wake();
-	Serial.println("READY:");
+	if(DEBUG){
+		Serial.begin(9600);
+	}
+	debugln("READY");
 
 	//Start timers
 	delayStart = millis();
@@ -558,5 +603,63 @@ void loop() {
 
 		//Update the LED strip
 		FastLED.show();
+	}
+}
+
+//Debug functions
+
+/**
+ * @brief Writes a single char to the debug serial
+ */
+void debug(const char msg){
+	if(DEBUG){
+		Serial.print(msg);
+	}
+}
+
+/**
+ * @brief Writes a string to the debug serial
+ */
+void debug(const char msg[]){
+	if(DEBUG){
+		Serial.print(msg);
+	}
+}
+
+/**
+ * @brief Writes a number to the debug serial
+ */
+void debug(const int msg){
+	if(DEBUG){
+		Serial.print(msg);
+	}
+}
+
+/**
+ * @brief Writes a single char to the debug serial and adds a newline
+ * 
+ * @param msg 
+ */
+void debugln(const char msg){
+	if(DEBUG){
+		Serial.println(msg);
+	}
+}
+
+/**
+ * @brief Writes a string to the debug serial and adds a newline
+ */
+void debugln(const char msg[]){
+	if(DEBUG){
+		Serial.println(msg);
+	}
+}
+
+/**
+ * @brief Writes a number to the debug serial and adds a newline
+ */
+void debugln(const int msg){
+	if(DEBUG){
+		Serial.println(msg);
 	}
 }
