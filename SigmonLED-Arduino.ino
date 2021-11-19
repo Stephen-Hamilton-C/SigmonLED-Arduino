@@ -524,7 +524,6 @@ void setup() {
 
 /**
  * @brief Arduino function that runs repeatedly
- * 
  */
 void loop() {
 	//Read commands
