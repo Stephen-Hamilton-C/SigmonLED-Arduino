@@ -6,6 +6,10 @@ SigmonLED uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 [comment]: # (This is a comment, it will not be included)
 
+## [0.4.1] - 2021-12-31
+### Fixed
+- Potential lockout bug. If there is no comms for 3 minutes, SigmonLED disconnects anything connected to the bluetooth module
+
 ## [0.4.0] - 2021-04-09
 ### Added
 - Palette Stretch setting. use s# to change (where # is a single-digit hexadecimal number)
