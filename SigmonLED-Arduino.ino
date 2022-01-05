@@ -6,7 +6,7 @@
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 #define CONN_TIMEOUT 180000 //Automatically disconnect after 3 minutes of inactivity
-#define VERSION "0.4.1"
+#define VERSION "0.4.2"
 
 //Timer
 unsigned long connTimer = 0;
@@ -199,6 +199,12 @@ void Wake() {
 	brightness = 255;
 }
 
+void Sleep() {
+  delayTime = 10;
+  brightness = 0;
+  currentMode = SLEEP;
+}
+
 void handleCommand(char& rxChar){
 	switch (rxChar) {
 		//Go into static color mode and set the red channel
@@ -271,9 +277,7 @@ void handleCommand(char& rxChar){
 		}
 		//Go to sleep
 		case 'S': {
-			delayTime = 10;
-			brightness = 0;
-			currentMode = SLEEP;
+			Sleep();
 			break;
 		}
 		//Wake up
@@ -534,7 +538,7 @@ void setup() {
 	//Init bluetooth and LEDs
 	Serial.begin(9600);
 	FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-	Wake();
+	Sleep();
 
 	pinMode(LED_BUILTIN, OUTPUT);
 	digitalWrite(LED_BUILTIN, LOW);
