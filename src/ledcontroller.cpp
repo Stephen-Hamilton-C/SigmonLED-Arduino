@@ -13,7 +13,7 @@ LEDController::LEDController(SoftwareSerial* HM10) {
 void LEDController::loop() {
     switch(_currentMode) {
         case Mode::Color: {
-            // Do nothing - color will be set when it is set
+            // Do nothing - color will be changed in setColor
             break;
         }
         case Mode::Palette: {
