@@ -18,7 +18,6 @@ void setup() {
     Serial.begin(9600);
     HM10.begin(SERIAL_BAUD);
 
-    delay(3000);
     Serial.println("Hello, world!");
 
     // // Prepare LEDs
