@@ -16,6 +16,8 @@ void CommandHandler::handle(const uint8_t (&readBuffer)[READ_BUFFER_SIZE], uint8
             command = new ColorCommand(_controller);
             break;
         case 'p':
+        case 'P':
+        case 's':
             Serial.println("Palette");
             command = new PaletteCommand(_controller);
             break;
