@@ -26,7 +26,7 @@ void LEDController::paletteLoop() {
                 colorIndex += _paletteConfig.stretch;
             }
             FastLED.show();
-            delay(_paletteConfig.delay);
+            delay(_paletteConfig.delay); // TODO: Use timer instead of delay
             break;
         }
         case PaletteMode::SOLID: {
@@ -35,7 +35,7 @@ void LEDController::paletteLoop() {
             }
             colorIndex += _paletteConfig.stretch;
             FastLED.show();
-            delay(_paletteConfig.delay);
+            delay(_paletteConfig.delay); // TODO: Use timer instead of delay
             break;
         }
         case PaletteMode::STATIC: return; // Do nothing for STATIC as it will be set when palettes and modes are set
