@@ -1,13 +1,13 @@
 #include "ledcontroller.h"
 
-LEDController::LEDController(SoftwareSerial* HM10) {
-    _HM10 = HM10;
-
+LEDController::LEDController() {
     // TODO: Figure out why addLeds won't take Config consts
     // TODO: Figure out how to stuff WS2811 into a Config const
-    FastLED.addLeds<WS2811, LED_PIN, LED_COLOR_ORDER>(
+    FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(
         _leds, LED_COUNT
     ).setCorrection(LED_COLOR_CORRECTION);
+    
+    setColor(CRGB::Black);
 }
 
 void LEDController::loop() {
@@ -25,7 +25,8 @@ void LEDController::loop() {
 
 void LEDController::setColor(const CRGB& color) {
     _currentColor = color;
-    FastLED.showColor(_currentColor);
-    // TODO: Is this line necessary?
+    for (int i = 0; i < LED_COUNT; i++) {
+        _leds[i] = color;
+    }
     FastLED.show();
 }

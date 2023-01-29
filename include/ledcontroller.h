@@ -5,14 +5,9 @@
 #include <SoftwareSerial.h>
 #include "config.h"
 
-#define LED_PIN 8
-#define LED_COUNT 81
-#define LED_COLOR_ORDER EOrder::GRB
-#define LED_COLOR_CORRECTION LEDColorCorrection::TypicalLEDStrip
-
 class LEDController {
 public:
-    LEDController(SoftwareSerial* HM10);
+    LEDController();
     void loop();
 
     void setColor(const CRGB& color);
@@ -24,7 +19,6 @@ public:
 
 private:
     CRGB _leds[LED_COUNT];
-    SoftwareSerial* _HM10;
 
     Mode _currentMode = Mode::Color;
     CRGB _currentColor = CRGB(255, 255, 255);

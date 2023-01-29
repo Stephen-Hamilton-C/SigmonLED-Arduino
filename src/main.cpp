@@ -8,21 +8,22 @@
 #include "constants.h"
 #include "commands/commandhandler.h"
 #include "ledcontroller.h"
-using namespace Constants;
-using namespace Config;
 
 SoftwareSerial HM10(2, 3);
-CommandHandler* handler;
 LEDController* controller;
+CommandHandler* handler;
 
 void setup() {
     // Setup Serial interfaces
     Serial.begin(9600);
     HM10.begin(SERIAL_BAUD);
 
-    // Prepare LEDs
-    controller = new LEDController(&HM10);
-    handler = new CommandHandler(controller);
+    delay(3000);
+    Serial.println("Hello, world!");
+
+    // // Prepare LEDs
+    controller = new LEDController();
+    handler = new CommandHandler(*controller);
 
     // Disable the built-in LED
     pinMode(LED_BUILTIN, OUTPUT);
@@ -32,8 +33,9 @@ void setup() {
 void loop() {
     // Handle input
     if(HM10.available()) {
-        uint8_t* buffer[READ_BUFFER_SIZE] = {};
-        uint8_t len = HM10.readBytesUntil('#', *buffer, READ_BUFFER_SIZE);
+        uint8_t buffer[READ_BUFFER_SIZE] = {};
+        uint8_t len = HM10.readBytesUntil('#', buffer, READ_BUFFER_SIZE);
+
         handler->handle(buffer, len);
     }
 

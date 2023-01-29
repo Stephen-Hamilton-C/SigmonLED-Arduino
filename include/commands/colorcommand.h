@@ -2,13 +2,14 @@
 #define COLORCOMMAND_H
 
 #include "command.h"
+#include "constants.h"
 
 class ColorCommand: public Command {
 public:
-    ColorCommand(LEDController* controller);
+    ColorCommand(LEDController& controller);
 
     //Override
-    void receivedInput(const uint8_t* input[], const uint8_t& len);
+    void receivedInput(const uint8_t (&input)[READ_BUFFER_SIZE], const uint8_t& len);
 };
 
 #endif

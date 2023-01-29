@@ -3,14 +3,15 @@
 
 #include <stdint.h>
 #include <ledcontroller.h>
+#include "constants.h"
 
 class Command {
 public:
-    Command(LEDController* controller);
-    virtual void receivedInput(const uint8_t* input[], const uint8_t& len) = 0;
+    Command(LEDController& controller);
+    virtual void receivedInput(const uint8_t (&input)[READ_BUFFER_SIZE], const uint8_t& len) = 0;
 
 protected:
-    LEDController* _controller;
+    LEDController& _controller;
 };
 
 #endif
