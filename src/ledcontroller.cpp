@@ -61,20 +61,21 @@ void LEDController::setBrightness(const uint8_t &brightness) {
 }
 
 void LEDController::setPalette(const CRGBPalette16 &palette) {
-    Serial.println("Set palette");
     _paletteConfig.palette = palette;
     setPaletteStaticColor();
 }
 
 void LEDController::setPaletteMode(const PaletteMode &mode) {
     _paletteConfig.mode = mode;
-    Serial.print("Set palette mode to ");
-    Serial.println(mode);
     setPaletteStaticColor();
 }
 
 void LEDController::setPaletteDelay(const uint16_t &delay) {
     _paletteConfig.delay = delay;
+}
+
+void LEDController::setPaletteStretch(const uint8_t &stretch) {
+    _paletteConfig.stretch = stretch;
 }
 
 void LEDController::setPaletteBlending(const bool &blending) {

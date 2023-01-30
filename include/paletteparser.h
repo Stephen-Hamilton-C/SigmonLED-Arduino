@@ -4,8 +4,11 @@
 #include <stdint.h>
 #include <FastLED.h>
 
-namespace PaletteParser {
-    CRGBPalette16 parseToPalette(const uint8_t& desiredPalette);
-}
+class PaletteParser {
+public:
+    static CRGBPalette16 parseToPalette(const uint8_t& desiredPalette);
+private:
+    static CRGBPalette16 _customPalette;
+};
 
 #endif

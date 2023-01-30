@@ -1,5 +1,7 @@
 #include "paletteparser.h"
 
+CRGBPalette16 PaletteParser::_customPalette = CRGBPalette16(CRGB(0, 0, 0));
+
 CRGBPalette16 PaletteParser::parseToPalette(const uint8_t& desiredPalette) {
     switch(desiredPalette) {
         case 'r':
@@ -25,7 +27,7 @@ CRGBPalette16 PaletteParser::parseToPalette(const uint8_t& desiredPalette) {
             return ForestColors_p;
         case 'C':
             Serial.println("Received Custom palette");
-            return CRGBPalette16(CRGB(0, 0, 0));
+            return _customPalette;
         default:
             Serial.println("Received unknown palette");
             return CRGBPalette16(CRGB(0, 0, 0));
