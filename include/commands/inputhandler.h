@@ -11,7 +11,6 @@
 class InputHandler {
 public:
     InputHandler(LEDController& controller);
-    // void nextByte(const uint8_t desiredCmd);
     void processByte(const uint8_t byte);
     void loop();
 
@@ -20,10 +19,7 @@ private:
     uint8_t _buffer[BUFFER_SIZE] = {};
     uint8_t _bufferLen = 0;
     unsigned long _timeOfLastByte = 0;
-    // Command* _nextCommand = nullptr;
 
-    // void fireCommandForArgs();
-    // void reset();
     Command* getCommand(const uint8_t& cmdByte);
 };
 
