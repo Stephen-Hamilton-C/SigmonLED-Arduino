@@ -18,7 +18,7 @@ public:
 private:
     LEDController& _controller;
     uint8_t _buffer[BUFFER_SIZE] = {};
-    uint16_t _bufferLen = 0;
+    uint8_t _bufferLen = 0;
     unsigned long _timeOfLastByte = 0;
     // Command* _nextCommand = nullptr;
 
