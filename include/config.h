@@ -35,6 +35,6 @@
  * It's recommended to set the baud on the module before connecting it to the Arduino.
  * Otherwise, HM10s default to 9600
 */
-#define SERIAL_BAUD 9600 //115200
+#define SERIAL_BAUD 115200 //9600 
 
 #endif
