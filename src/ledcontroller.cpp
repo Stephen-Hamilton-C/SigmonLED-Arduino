@@ -5,9 +5,6 @@ LEDController::LEDController() {
         _leds, LED_COUNT
     ).setCorrection(LED_COLOR_CORRECTION);
     
-    // TODO: Remove this when BrightnessCommand is done
-    FastLED.setBrightness(32);
-
     setColor(CRGB::Black);
 }
 
@@ -46,6 +43,12 @@ void LEDController::paletteLoop() {
 
 void LEDController::setMode(const Mode &mode) {
     _currentMode = mode;
+    if(_currentMode == Mode::COLOR) {
+        FastLED.setBrightness(255);
+        FastLED.show();
+    } else {
+        setBrightness(_brightness);
+    }
 }
 
 void LEDController::setColor(const CRGB &color) {
