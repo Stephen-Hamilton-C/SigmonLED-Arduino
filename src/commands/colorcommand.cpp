@@ -3,9 +3,10 @@
 ColorCommand::ColorCommand(LEDController& controller): Command(controller) {}
 
 void ColorCommand::fire(uint8_t* argArray) {
-    const uint8_t r = argArray[0];
-    const uint8_t g = argArray[1];
-    const uint8_t b = argArray[2];
+
+    const uint8_t r = argArray[1];
+    const uint8_t g = argArray[2];
+    const uint8_t b = argArray[3];
 
     const CRGB color(r, g, b);
     _controller.setColor(color);

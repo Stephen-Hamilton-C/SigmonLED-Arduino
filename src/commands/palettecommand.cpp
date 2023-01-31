@@ -6,7 +6,7 @@
 PaletteCommand::PaletteCommand(LEDController& controller): Command(controller) {}
 
 void PaletteCommand::fire(uint8_t* argArray) {
-    const uint8_t rawPalette = argArray[0];
+    const uint8_t rawPalette = argArray[1];
 
     CRGBPalette16 palette = PaletteParser::parseToPalette(rawPalette);
     _controller.setPalette(palette);

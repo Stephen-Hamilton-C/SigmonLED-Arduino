@@ -3,7 +3,7 @@
 BlendingCommand::BlendingCommand(LEDController& controller): Command(controller) {}
 
 void BlendingCommand::fire(uint8_t* argArray) {
-    const uint8_t blending = argArray[0];
+    const uint8_t blending = argArray[1];
     _controller.setPaletteBlending(blending);
 }
 

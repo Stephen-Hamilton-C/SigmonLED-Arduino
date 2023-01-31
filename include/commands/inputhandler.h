@@ -5,21 +5,26 @@
 #include "command.h"
 #include "ledcontroller.h"
 
-#define BUFFER_SIZE 64
+#define BUFFER_SIZE 256
+#define BUFFER_TIMEOUT 1000
 
 class InputHandler {
 public:
     InputHandler(LEDController& controller);
-    void nextByte(const uint8_t desiredCmd);
+    // void nextByte(const uint8_t desiredCmd);
+    void processByte(const uint8_t byte);
+    void loop();
 
 private:
     LEDController& _controller;
     uint8_t _buffer[BUFFER_SIZE] = {};
-    uint8_t _bufferLen = 0;
-    Command* _nextCommand = nullptr;
+    uint16_t _bufferLen = 0;
+    unsigned long _timeOfLastByte = 0;
+    // Command* _nextCommand = nullptr;
 
-    void fireCommandForArgs();
-    void reset();
+    // void fireCommandForArgs();
+    // void reset();
+    Command* getCommand(const uint8_t& cmdByte);
 };
 
 #endif

@@ -11,8 +11,7 @@ InputHandler* handler;
 
 void setup() {
     // Setup Serial interfaces
-    Serial.begin(9600);
-    Serial.println("Hello, world!");
+    Serial.begin(SERIAL_BAUD);
 
     // Prepare LEDs
     controller = new LEDController();
@@ -25,9 +24,9 @@ void setup() {
 
 void loop() {
     // Handle input
-    if(Serial.available()) {
-        handler->nextByte(Serial.read());
-    }
+    while(Serial.available())
+        handler->processByte(Serial.read());
 
+    handler->loop();
     controller->loop();
 }

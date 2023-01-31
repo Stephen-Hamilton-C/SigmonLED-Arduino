@@ -3,7 +3,7 @@
 PaletteModeCommand::PaletteModeCommand(LEDController &controller): Command(controller) {}
 
 void PaletteModeCommand::fire(uint8_t* argArray) {
-    const uint8_t rawPaletteMode = argArray[0];
+    const uint8_t rawPaletteMode = argArray[1];
 
     PaletteMode paletteMode = (PaletteMode) rawPaletteMode;
     _controller.setPaletteMode(paletteMode);
