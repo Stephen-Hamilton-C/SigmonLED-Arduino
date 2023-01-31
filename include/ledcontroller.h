@@ -35,6 +35,7 @@ private:
     CRGB _currentColor = CRGB(255, 255, 255);
     uint8_t _scrollingColorIndex = 0;
     uint8_t _brightness = 255;
+    unsigned long _lastUpdate = 0;
 
     PaletteConfig _paletteConfig = PaletteConfig { 
         palette: RainbowColors_p,

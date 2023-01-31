@@ -17,28 +17,30 @@ void LEDController::loop() {
 }
 
 void LEDController::paletteLoop() {
-    uint8_t colorIndex = ++_scrollingColorIndex;
+    const unsigned long currentMillis = millis();
 
-    switch(_paletteConfig.mode) {
-        case PaletteMode::SCROLLING: {
-            for(int i = 0; i < LED_COUNT; i++) {
-                _leds[i] = ColorFromPalette(_paletteConfig.palette, colorIndex, 255, _paletteConfig.blending);
+    if(currentMillis - _lastUpdate >= _paletteConfig.delay) {
+        uint8_t colorIndex = ++_scrollingColorIndex;
+
+        switch(_paletteConfig.mode) {
+            case PaletteMode::SCROLLING: {
+                for(int i = 0; i < LED_COUNT; i++) {
+                    _leds[i] = ColorFromPalette(_paletteConfig.palette, colorIndex, 255, _paletteConfig.blending);
+                    colorIndex += _paletteConfig.stretch;
+                }
+                FastLED.show();
+                break;
+            }
+            case PaletteMode::SOLID: {
+                for(int i = 0; i < LED_COUNT; i++) {
+                    _leds[i] = ColorFromPalette(_paletteConfig.palette, colorIndex, 255, _paletteConfig.blending);
+                }
                 colorIndex += _paletteConfig.stretch;
+                FastLED.show();
+                break;
             }
-            FastLED.show();
-            delay(_paletteConfig.delay); // TODO: Use timer instead of delay
-            break;
+            case PaletteMode::STATIC: return; // Do nothing for STATIC as it will be set when palettes and modes are set
         }
-        case PaletteMode::SOLID: {
-            for(int i = 0; i < LED_COUNT; i++) {
-                _leds[i] = ColorFromPalette(_paletteConfig.palette, colorIndex, 255, _paletteConfig.blending);
-            }
-            colorIndex += _paletteConfig.stretch;
-            FastLED.show();
-            delay(_paletteConfig.delay); // TODO: Use timer instead of delay
-            break;
-        }
-        case PaletteMode::STATIC: return; // Do nothing for STATIC as it will be set when palettes and modes are set
     }
 }
 
