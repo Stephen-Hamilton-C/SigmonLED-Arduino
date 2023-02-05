@@ -3,8 +3,11 @@
 #include "commands/brightnesscommand.h"
 #include "commands/colorcommand.h"
 #include "commands/delaycommand.h"
+#include "commands/offcommand.h"
+#include "commands/oncommand.h"
 #include "commands/palettecommand.h"
 #include "commands/palettemodecommand.h"
+#include "commands/storecolorcommand.h"
 #include "commands/stretchcommand.h"
 
 InputHandler::InputHandler(LEDController& controller): _controller(controller) {}
@@ -44,12 +47,15 @@ void InputHandler::processByte(const uint8_t byte) {
 
 Command* InputHandler::getCommand(const uint8_t& cmdByte) {
     switch(cmdByte) {
-        case 'c': return new ColorCommand(_controller);
-        case 'p': return new PaletteCommand(_controller);
-        case 'P': return new PaletteModeCommand(_controller);
         case 'l': return new BlendingCommand(_controller);
         case 'b': return new BrightnessCommand(_controller);
+        case 'c': return new ColorCommand(_controller);
         case 'd': return new DelayCommand(_controller);
+        case '0': return new OffCommand(_controller);
+        case '1': return new OnCommand(_controller);
+        case 'p': return new PaletteCommand(_controller);
+        case 'P': return new PaletteModeCommand(_controller);
+        case 'S': return new StoreColorCommand(_controller);
         case 's': return new StretchCommand(_controller);
     }
 
