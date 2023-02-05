@@ -3,7 +3,6 @@
 ColorCommand::ColorCommand(LEDController& controller): Command(controller) {}
 
 void ColorCommand::fire(uint8_t* argArray) {
-
     const uint8_t r = argArray[1];
     const uint8_t g = argArray[2];
     const uint8_t b = argArray[3];
