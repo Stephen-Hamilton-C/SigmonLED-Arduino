@@ -2,6 +2,7 @@
 #include "commands/blendingcommand.h"
 #include "commands/brightnesscommand.h"
 #include "commands/colorcommand.h"
+#include "commands/custompalettecommand.h"
 #include "commands/delaycommand.h"
 #include "commands/offcommand.h"
 #include "commands/oncommand.h"
@@ -50,6 +51,7 @@ Command* InputHandler::getCommand(const uint8_t& cmdByte) {
         case 'l': return new BlendingCommand(_controller);
         case 'b': return new BrightnessCommand(_controller);
         case 'c': return new ColorCommand(_controller);
+        case 'C': return new CustomPaletteCommand(_controller);
         case 'd': return new DelayCommand(_controller);
         case '0': return new OffCommand(_controller);
         case '1': return new OnCommand(_controller);

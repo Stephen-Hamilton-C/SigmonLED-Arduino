@@ -7,8 +7,7 @@
 class PaletteParser {
 public:
     static CRGBPalette16 parseToPalette(const uint8_t& desiredPalette);
-private:
-    static CRGBPalette16 _customPalette;
+    static CRGBPalette16 customPalette;
 };
 
 #endif
