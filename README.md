@@ -21,6 +21,7 @@ Otherwise, you'll need to change the LED_TYPE constant in [config.h](https://git
 
 ## Commands
 Commands are given with standard ASCII chars, but their arguments are typically in binary.
+All commands **must** be terminated with a `\n` character. Unfortunately, this also means that any binary argument sent as `10` will register as the end of the command. So no color can be exactly `10`.
 
 - `l` (1 binary arg): Sets the linear blending mode for palettes.
   - `0`: No linear blending.
