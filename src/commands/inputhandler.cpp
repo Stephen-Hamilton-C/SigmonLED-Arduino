@@ -17,6 +17,7 @@ void InputHandler::loop() {
 }
 
 void InputHandler::processByte(const uint8_t byte) {
+    Serial.println(byte); // I don't understand it, but leaving these in somehow prevents the Arduino from locking up
     if(_bufferLen < BUFFER_SIZE - 1) {
         _buffer[_bufferLen++] = byte;
     } else {
@@ -26,6 +27,7 @@ void InputHandler::processByte(const uint8_t byte) {
     }
 
     if(byte == '\n') {
+        Serial.println(); // I don't understand it, but leaving these in somehow prevents the Arduino from locking up
         // Terminator received, process line
         Command* cmd = getCommand(_buffer[0]);
         if(cmd != nullptr) {
@@ -44,11 +46,12 @@ Command* InputHandler::getCommand(const uint8_t& cmdByte) {
     switch(cmdByte) {
         case 'c': return new ColorCommand(_controller);
         case 'p': return new PaletteCommand(_controller);
-        case 'P': new PaletteModeCommand(_controller);
-        case 'l': new BlendingCommand(_controller);
-        case 'b': new BrightnessCommand(_controller);
-        case 'd': new DelayCommand(_controller);
-        case 's': new StretchCommand(_controller);
-        default: return nullptr;
+        case 'P': return new PaletteModeCommand(_controller);
+        case 'l': return new BlendingCommand(_controller);
+        case 'b': return new BrightnessCommand(_controller);
+        case 'd': return new DelayCommand(_controller);
+        case 's': return new StretchCommand(_controller);
     }
+
+    return nullptr;
 }
