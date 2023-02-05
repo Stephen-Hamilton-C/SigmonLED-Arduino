@@ -55,6 +55,7 @@ Command* InputHandler::getCommand(const uint8_t& cmdByte) {
         case 'P': return new PaletteModeCommand(_controller);
         case 'S': return new StoreColorCommand(_controller);
         case 's': return new StretchCommand(_controller);
-        default: return nullptr;
     }
+
+    return nullptr;
 }
