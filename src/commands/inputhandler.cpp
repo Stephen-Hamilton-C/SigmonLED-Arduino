@@ -43,14 +43,15 @@ void InputHandler::processByte(const uint8_t byte) {
 
 Command* InputHandler::getCommand(const uint8_t& cmdByte) {
     switch(cmdByte) {
-        case 'l': new BlendingCommand(_controller);
-        case 'b': new BrightnessCommand(_controller);
+        case 'l': return new BlendingCommand(_controller);
+        case 'b': return new BrightnessCommand(_controller);
         case 'c': return new ColorCommand(_controller);
         case 'C': return new CustomPaletteCommand(_controller);
-        case 'd': new DelayCommand(_controller);
+        case 'd': return new DelayCommand(_controller);
         case 'p': return new PaletteCommand(_controller);
-        case 'P': new PaletteModeCommand(_controller);
-        case 's': new StretchCommand(_controller);
-        default: return nullptr;
+        case 'P': return new PaletteModeCommand(_controller);
+        case 's': return new StretchCommand(_controller);
     }
+    
+    return nullptr;
 }
