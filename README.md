@@ -55,3 +55,7 @@ All commands **must** be terminated with a `\n` character. Unfortunately, this a
   - The next three bytes are the red, green, and blue channels respectively.
 - `s`: (1 binary arg): Palette Stretch. This determines how much a palette is distributed across the LED strip.
   - A byte from 0 - 255.
+
+## License
+SigmonLED is licensed under the GNU General Public License v3.0. You can find the license details in the `LICENSE` file in the main branch. Feel free to repurpose, redistribute, and branch off this code anytime :D
+
