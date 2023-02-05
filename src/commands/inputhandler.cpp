@@ -15,8 +15,15 @@ InputHandler::InputHandler(LEDController& controller): _controller(controller) {
 
 void InputHandler::loop() {
     const unsigned long currentMillis = millis();
-    if(currentMillis - _timeOfLastByte > BUFFER_TIMEOUT) {
+    const unsigned long timeSinceLastByte = currentMillis - _timeOfLastByte;
+
+    if(timeSinceLastByte > BUFFER_TIMEOUT) {
         _bufferLen = 0;
+    }
+
+    if(_connected && timeSinceLastByte > CONNECTION_TIMEOUT) {
+        _connected = false;
+        Serial.write("AT");
     }
 }
 
@@ -44,6 +51,7 @@ void InputHandler::processByte(const uint8_t byte) {
     }
 
     _timeOfLastByte = millis();
+    _connected = true;
 }
 
 Command* InputHandler::getCommand(const uint8_t& cmdByte) {

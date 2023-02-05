@@ -19,6 +19,7 @@ private:
     uint8_t _buffer[BUFFER_SIZE] = {};
     uint8_t _bufferLen = 0;
     unsigned long _timeOfLastByte = 0;
+    bool _connected = false;
 
     Command* getCommand(const uint8_t& cmdByte);
 };
