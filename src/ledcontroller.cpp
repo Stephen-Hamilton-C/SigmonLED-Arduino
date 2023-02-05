@@ -81,6 +81,7 @@ void LEDController::setPaletteDelay(const uint16_t &delay) {
 
 void LEDController::setPaletteStretch(const uint8_t &stretch) {
     _paletteConfig.stretch = stretch;
+    setPaletteStaticColor();
 }
 
 void LEDController::setPaletteBlending(const bool &blending) {
@@ -91,12 +92,10 @@ void LEDController::setPaletteBlending(const bool &blending) {
 void LEDController::setPaletteStaticColor() {
     if(_paletteConfig.mode != PaletteMode::STATIC) return;
 
-    // TODO: I need to do math ;-;
-    // We need to equally distribute the 16 palette colors across LED_COUNT leds
     uint8_t colorIndex = 0;
     for(int i = 0; i < LED_COUNT; i++) {
         _leds[i] = ColorFromPalette(_paletteConfig.palette, colorIndex, 255, _paletteConfig.blending);
-        colorIndex+=10;
+        colorIndex += _paletteConfig.stretch;
     }
     FastLED.show();
 }
