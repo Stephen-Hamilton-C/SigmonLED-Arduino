@@ -10,6 +10,8 @@ void CustomPaletteCommand::fire(uint8_t *argArray) {
     }
 
     PaletteParser::customPalette = CRGBPalette16(colors);
+    _controller.setPalette(PaletteParser::customPalette);
+    _controller.setMode(LEDController::Mode::PALETTE);
 }
 
 uint8_t CustomPaletteCommand::requiredArgs() {
