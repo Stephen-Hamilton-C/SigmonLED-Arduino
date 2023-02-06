@@ -42,7 +42,7 @@ void InputHandler::processByte(const uint8_t byte) {
         // Terminator received, process line
         Command* cmd = getCommand(_buffer[0]);
         if(cmd != nullptr) {
-            if(_bufferLen >= cmd->requiredArgs()) {
+            if(_bufferLen-1 >= cmd->requiredArgs()) {
                 cmd->fire(_buffer);
             }
         }
