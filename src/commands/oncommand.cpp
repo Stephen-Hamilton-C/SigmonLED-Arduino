@@ -6,6 +6,7 @@ OnCommand::OnCommand(LEDController& controller): Command(controller) {}
 
 void OnCommand::fire(uint8_t* argArray) {
     _controller.setColor(storedColor);
+    _controller.setMode(LEDController::Mode::COLOR);
 }
 
 uint8_t OnCommand::requiredArgs() {
