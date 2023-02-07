@@ -4,7 +4,7 @@ This code turns your Arduino into a WS2811 LED controller. Controlled using UART
 
 Originally created as a Christmas gift for my sister
 
-See [SigmonLED-App](https://github.com/Stephen-Hamilton-C/sigmonled-app) for an Android app that can control this over Bluetooth.
+See [SigmonLED-App](https://github.com/Stephen-Hamilton-C/SigmonLED-App) for an Android app and [SigmonLED-Desktop](https://github.com/Stephen-Hamilton-C/SigmonLED-Desktop) for a desktop application that can control this over Bluetooth.
 
 ## Setup
 You'll need an Arduino, LED strip, and a serial interface, preferably an HM-10 BLE module, though other methods should theoretically work.
