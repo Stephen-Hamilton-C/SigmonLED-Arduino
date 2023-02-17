@@ -18,6 +18,7 @@ void InputHandler::loop() {
     const unsigned long timeSinceLastByte = currentMillis - _timeOfLastByte;
 
     if(timeSinceLastByte > BUFFER_TIMEOUT) {
+        digitalWrite(LED_BUILTIN, LOW);
         _bufferLen = 0;
     }
 
@@ -28,7 +29,8 @@ void InputHandler::loop() {
 }
 
 void InputHandler::processByte(const uint8_t byte) {
-    Serial.println(byte); // I don't understand it, but leaving these in somehow prevents the Arduino from locking up
+    digitalWrite(LED_BUILTIN, HIGH);
+
     if(_bufferLen < BUFFER_SIZE - 1) {
         _buffer[_bufferLen++] = byte;
     } else {
@@ -38,12 +40,13 @@ void InputHandler::processByte(const uint8_t byte) {
     }
 
     if(byte == '\n') {
-        Serial.println(); // I don't understand it, but leaving these in somehow prevents the Arduino from locking up
         // Terminator received, process line
         Command* cmd = getCommand(_buffer[0]);
         if(cmd != nullptr) {
             if(_bufferLen-1 >= cmd->requiredArgs()) {
                 cmd->fire(_buffer);
+                delete cmd;
+                cmd = nullptr;
             }
         }
 

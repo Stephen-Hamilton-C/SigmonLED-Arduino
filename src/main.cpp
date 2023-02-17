@@ -24,7 +24,7 @@ void setup() {
 
 void loop() {
     // Handle input
-    while(Serial.available())
+    if(Serial.available() > 0)
         handler->processByte(Serial.read());
 
     handler->loop();

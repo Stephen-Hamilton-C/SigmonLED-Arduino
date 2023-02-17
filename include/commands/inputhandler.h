@@ -5,7 +5,7 @@
 #include "command.h"
 #include "ledcontroller.h"
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 255
 #define BUFFER_TIMEOUT 1000
 
 class InputHandler {

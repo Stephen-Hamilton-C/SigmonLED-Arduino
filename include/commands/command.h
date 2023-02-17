@@ -7,6 +7,7 @@
 class Command {
 public:
     Command(LEDController& controller);
+    virtual ~Command();
     virtual void fire(uint8_t* argArray) = 0;
     virtual uint8_t requiredArgs() = 0;
 
