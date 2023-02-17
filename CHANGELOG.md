@@ -4,6 +4,13 @@ All notable changes to SigmonLED-Arduino will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 SigmonLED-Arduino uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2022-02-17
+### Fixed
+- Bad memory leak which would eventually make the Arduino freeze
+
+### Changed
+- Built-in LED now indicates when it is reading bytes
+
 ## [1.0.2] - 2022-02-07
 ### Fixed
 - On/Off commands not working when in Palette mode
