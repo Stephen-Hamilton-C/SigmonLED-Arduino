@@ -31,10 +31,10 @@
 #define CONNECTION_TIMEOUT 180000
 /**
  * @brief The desired baud rate for the hardware serial port
- * For HM10 BLE modules, to go into 115200 baud mode, send `AT+BAUD4`.
+ * For HM10 BLE modules, to go into 19200 baud mode, send `AT+BAUD1`.
  * It's recommended to set the baud on the module before connecting it to the Arduino.
  * Otherwise, HM10s default to 9600
 */
-#define SERIAL_BAUD 115200 //9600 
+#define SERIAL_BAUD 19200 //9600
 
 #endif
