@@ -3,19 +3,16 @@
 // but I have further ambitions that would further SigmonLED.
 
 #include <Arduino.h>
-#include "commands/inputhandler.h"
-#include "ledcontroller.h"
+#include "messagehandler.h"
+#include "config.h"
 
-LEDController* controller;
-InputHandler* handler;
+MessageHandler msgHandler;
+char buffer[MESSAGE_BUFFER];
+int bufferLen = 0;
 
 void setup() {
     // Setup Serial interfaces
     Serial.begin(SERIAL_BAUD);
-
-    // Prepare LEDs
-    controller = new LEDController();
-    handler = new InputHandler(*controller);
 
     // Disable the built-in LED
     pinMode(LED_BUILTIN, OUTPUT);
@@ -24,9 +21,23 @@ void setup() {
 
 void loop() {
     // Handle input
-    if(Serial.available() > 0)
-        handler->processByte(Serial.read());
+    while(Serial.available()) {
+        char nextChar = Serial.read();
+        buffer[bufferLen++] = nextChar;
+        #if ECHO
+            Serial.print(nextChar);
+        #endif
 
-    handler->loop();
-    controller->loop();
+        if(nextChar == '\n') {
+            // End of message
+            buffer[bufferLen++] = '\0';
+            msgHandler.processMessage(buffer, bufferLen);
+            bufferLen = 0;
+        } else if(bufferLen >= MESSAGE_BUFFER - 2) {
+            // Buffer overflow, ignore
+            bufferLen = 0;
+        }
+    }
+
+    msgHandler.loop();
 }
