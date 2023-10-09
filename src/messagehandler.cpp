@@ -9,6 +9,8 @@ void MessageHandler::loop() {
             _cleanup();
         }
     }
+
+    _commandHandler.loop();
 }
 
 void MessageHandler::processMessage(char message[], int messageLen) {
