@@ -2,8 +2,8 @@
 #define MESSAGEHANDLER_H
 
 #include "config.h"
-#include "commandhandler.h"
 #include <Arduino.h>
+#include "commandinfo.h"
 
 #define RESPONSE_VERIFY "verify "
 #define RESPONSE_CONFIRM "confirmed"
@@ -25,10 +25,9 @@ private:
     void _cleanup();
     void _freeStringArray(char** str, int len);
 
-    CommandHandler _commandHandler;
     State _currentState = State::RECEIVE;
+    CommandInfo _currentInfo;
     char** _currentMessage = NULL;
-    int _currentArgCount = 0;
     unsigned long _lastMessageTimestamp;
 };
 

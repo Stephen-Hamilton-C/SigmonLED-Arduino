@@ -1,5 +1,7 @@
 #include "messagehandler.h"
 
+#include "commands.h"
+
 // Public
 void MessageHandler::loop() {
     if (_currentState == State::ACKNOWLEDGE) {
@@ -9,8 +11,6 @@ void MessageHandler::loop() {
             _cleanup();
         }
     }
-
-    _commandHandler.loop();
 }
 
 void MessageHandler::processMessage(char message[], int messageLen) {
@@ -24,9 +24,9 @@ void MessageHandler::processMessage(char message[], int messageLen) {
             }
 
             Serial.print(RESPONSE_VERIFY);
-            for(int i = 0; i < _currentArgCount; i++) {
+            for(int i = 0; i < _currentInfo.argCount; i++) {
                 Serial.print(_currentMessage[i]);
-                if(i < _currentArgCount - 1) {
+                if(i < _currentInfo.argCount - 1) {
                     Serial.print(' ');
                 }
             }
@@ -40,12 +40,13 @@ void MessageHandler::processMessage(char message[], int messageLen) {
             if(strstr(message, MESSAGE_CONFIRM) != NULL) {
                 // Execute command based on _currentMessage[0]
                 Serial.println(RESPONSE_CONFIRM);
-                _commandHandler.execute(_currentMessage, _currentArgCount);
+                _currentInfo.command->run(_currentMessage);
+                _cleanup();
             } else {
+                _cleanup();
                 processMessage(message, messageLen);
                 return;
             }
-            _cleanup();
             break;
         }
     }
@@ -53,15 +54,13 @@ void MessageHandler::processMessage(char message[], int messageLen) {
 
 // Private
 char** MessageHandler::_splitCommand(char message[], int messageLen) {
-    int argCount = _commandHandler.getArgCount(message);
-    if(argCount < 0) {
+    _currentInfo = Commands::getArgCount(message);
+    if(_currentInfo.argCount <= 0) {
         return NULL;
     }
 
-    _currentArgCount = argCount;
-
-    char** arguments = new char*[_currentArgCount];
-    for(int i = 0; i < _currentArgCount; i++) {
+    char** arguments = new char*[_currentInfo.argCount];
+    for(int i = 0; i < _currentInfo.argCount; i++) {
         arguments[i] = NULL;
     }
 
@@ -71,7 +70,7 @@ char** MessageHandler::_splitCommand(char message[], int messageLen) {
     int arg = 0;
     for(int i = 0; i < messageLen; i++) {
         if(argBufferLen >= (MESSAGE_BUFFER / 2) - 1) {
-            _freeStringArray(arguments, _currentArgCount);
+            _cleanup();
             return NULL;
         }
 
@@ -82,7 +81,7 @@ char** MessageHandler::_splitCommand(char message[], int messageLen) {
             argBufferLen = 0;
 
             // Sufficient arguments. Ignore the rest of the message
-            if(arg >= _currentArgCount) {
+            if(arg >= _currentInfo.argCount) {
                 break;
             }
         } else {
@@ -90,10 +89,10 @@ char** MessageHandler::_splitCommand(char message[], int messageLen) {
         }
     }
 
-    for(int i = 0; i < _currentArgCount; i++) {
+    for(int i = 0; i < _currentInfo.argCount; i++) {
         if(arguments[i] == NULL) {
             // Found an argument that was not supplied
-            _freeStringArray(arguments, _currentArgCount);
+            _cleanup();
             return NULL;
         }
     }
@@ -102,10 +101,14 @@ char** MessageHandler::_splitCommand(char message[], int messageLen) {
 }
 
 void MessageHandler::_cleanup() {
-    _freeStringArray(_currentMessage, _currentArgCount);
+    _freeStringArray(_currentMessage, _currentInfo.argCount);
     _currentMessage = NULL;
-    _currentArgCount = 0;
     _lastMessageTimestamp = 0;
+    delete _currentInfo.command;
+    _currentInfo = CommandInfo {
+        argCount: -1,
+        command: nullptr
+    };
 }
 
 void MessageHandler::_freeStringArray(char** str, int len) {
