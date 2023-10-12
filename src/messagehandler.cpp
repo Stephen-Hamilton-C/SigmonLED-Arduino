@@ -53,11 +53,12 @@ void MessageHandler::processMessage(char message[], int messageLen) {
 
 // Private
 char** MessageHandler::_splitCommand(char message[], int messageLen) {
-    if(strstr(message, "command") != NULL) {
-        _currentArgCount = 3;
-    } else {
+    int argCount = _commandHandler.getArgCount(message);
+    if(argCount < 0) {
         return NULL;
     }
+
+    _currentArgCount = argCount;
 
     char** arguments = new char*[_currentArgCount];
     for(int i = 0; i < _currentArgCount; i++) {
