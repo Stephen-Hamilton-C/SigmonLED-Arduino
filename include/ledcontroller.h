@@ -33,6 +33,7 @@ public:
 
     const PaletteConfig& getPaletteConfig();
 
+    CRGBPalette16 customPalette = CRGBPalette16(CRGB::Black);
 private:
     CRGB _leds[LED_COUNT];
 
