@@ -6,13 +6,14 @@
 #include "messagehandler.h"
 #include "config.h"
 
-MessageHandler msgHandler;
+MessageHandler* msgHandler;
 char buffer[MESSAGE_BUFFER];
 int bufferLen = 0;
 
 void setup() {
     // Setup Serial interfaces
     Serial.begin(SERIAL_BAUD);
+    msgHandler = new MessageHandler();
 
     // Disable the built-in LED
     pinMode(LED_BUILTIN, OUTPUT);
@@ -31,7 +32,7 @@ void loop() {
         if(nextChar == '\n') {
             // End of message
             buffer[bufferLen++] = '\0';
-            msgHandler.processMessage(buffer, bufferLen);
+            msgHandler->processMessage(buffer, bufferLen);
             bufferLen = 0;
         } else if(bufferLen >= MESSAGE_BUFFER - 2) {
             // Buffer overflow, ignore
@@ -39,5 +40,5 @@ void loop() {
         }
     }
 
-    msgHandler.loop();
+    msgHandler->loop();
 }

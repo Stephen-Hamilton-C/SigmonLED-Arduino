@@ -11,6 +11,8 @@ void MessageHandler::loop() {
             _cleanup();
         }
     }
+
+    _controller.loop();
 }
 
 void MessageHandler::processMessage(char message[], int messageLen) {
@@ -40,7 +42,7 @@ void MessageHandler::processMessage(char message[], int messageLen) {
             if(strstr(message, MESSAGE_CONFIRM) != NULL) {
                 // Execute command based on _currentMessage[0]
                 Serial.println(RESPONSE_CONFIRM);
-                _currentInfo.command->run(_currentMessage);
+                _currentInfo.command->run(_currentMessage, _controller);
                 _cleanup();
             } else {
                 _cleanup();

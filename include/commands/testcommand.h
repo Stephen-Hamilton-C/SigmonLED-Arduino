@@ -5,7 +5,7 @@
 
 class TestCommand : public Command {
 public:
-    void run(char** command);
+    void run(char** command, LEDController& controller);
 };
 
 #endif

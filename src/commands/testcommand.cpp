@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-void TestCommand::run(char** command) {
+void TestCommand::run(char** command, LEDController& controller) {
     Serial.print("Test: ");
     Serial.println(command[0]);
 }

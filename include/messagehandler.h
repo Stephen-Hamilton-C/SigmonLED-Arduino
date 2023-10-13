@@ -1,9 +1,10 @@
 #ifndef MESSAGEHANDLER_H
 #define MESSAGEHANDLER_H
 
-#include "config.h"
 #include <Arduino.h>
+#include "config.h"
 #include "commandinfo.h"
+#include "ledcontroller.h"
 
 #define RESPONSE_VERIFY "verify "
 #define RESPONSE_CONFIRM "confirmed"
@@ -29,6 +30,8 @@ private:
     CommandInfo _currentInfo;
     char** _currentMessage = NULL;
     unsigned long _lastMessageTimestamp;
+
+    LEDController _controller;
 };
 
 #endif
