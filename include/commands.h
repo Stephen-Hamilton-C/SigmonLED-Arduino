@@ -4,8 +4,9 @@
 #include <string.h>
 #include "commandinfo.h"
 
-#include "commands/testcommand.h"
 #include "commands/colorcommand.h"
+#include "commands/hellocommand.h"
+#include "commands/testcommand.h"
 
 struct Commands {
 public:
@@ -20,6 +21,12 @@ public:
             return CommandInfo {
                 argCount: 4,
                 command: new ColorCommand()
+            };
+        }
+        if(strstr(command, "hello") != NULL) {
+            return CommandInfo {
+                argCount: 1,
+                command: new HelloCommand()
             };
         }
 

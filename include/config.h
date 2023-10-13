@@ -6,6 +6,8 @@
 
 #define ECHO true
 
+#define VERSION "3.0.0"
+
 #define MESSAGE_BUFFER 128
 /**
  * @brief Which pin your LED data wire is plugged into.

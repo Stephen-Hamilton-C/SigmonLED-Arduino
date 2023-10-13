@@ -65,8 +65,9 @@ void LEDController::setBrightness(const uint8_t &brightness) {
     FastLED.show();
 }
 
-void LEDController::setPalette(const CRGBPalette16 &palette) {
+void LEDController::setPalette(const CRGBPalette16 &palette, const PaletteType& type) {
     _paletteConfig.palette = palette;
+    _paletteConfig.type = type;
     setPaletteStaticColor();
 }
 
@@ -98,4 +99,20 @@ void LEDController::setPaletteStaticColor() {
         colorIndex += _paletteConfig.stretch;
     }
     FastLED.show();
+}
+
+const LEDController::Mode LEDController::getMode() {
+    return _currentMode;
+}
+
+const CRGB LEDController::getColor() {
+    return _currentColor;
+}
+
+const uint8_t LEDController::getBrightness() {
+    return _brightness;
+}
+
+const PaletteConfig& LEDController::getPaletteConfig() {
+    return _paletteConfig;
 }
