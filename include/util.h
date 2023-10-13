@@ -18,7 +18,7 @@ struct Util {
         return num;
     }
 
-    static bool strStartsWith(char str[], char startswith[]) {
+    static bool strStartsWith(const char str[], const char startswith[]) {
         // Source: https://stackoverflow.com/a/4770992
         return strncmp(startswith, str, strlen(startswith)) == 0;
     }
