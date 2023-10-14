@@ -38,6 +38,8 @@ void LEDController::paletteLoop() {
             }
             case PaletteMode::STATIC: return; // Do nothing for STATIC as it will be set when palettes and modes are set
         }
+
+        _lastUpdate = currentMillis;
     }
 }
 
