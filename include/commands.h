@@ -54,7 +54,7 @@ public:
                 command: new PaletteCommand()
             };
         }
-        if(Util::strStartsWith(command, "palettemode")) {
+        if(Util::strStartsWith(command, "pmode")) {
             return CommandInfo {
                 argCount: 2,
                 command: new PaletteModeCommand()
