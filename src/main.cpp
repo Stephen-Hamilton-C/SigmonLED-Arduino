@@ -9,6 +9,8 @@
 MessageHandler* msgHandler;
 char buffer[MESSAGE_BUFFER];
 int bufferLen = 0;
+unsigned long lastMessageTimestamp = 0;
+bool connected = false;
 
 void setup() {
     // Setup Serial interfaces
@@ -23,6 +25,9 @@ void setup() {
 void loop() {
     // Handle input
     while(Serial.available()) {
+        connected = true;
+        lastMessageTimestamp = millis();
+
         char nextChar = Serial.read();
         buffer[bufferLen++] = nextChar;
         #if ECHO
@@ -38,6 +43,11 @@ void loop() {
             // Buffer overflow, ignore
             bufferLen = 0;
         }
+    }
+
+    if(connected && millis() - lastMessageTimestamp >= CONNECTION_TIMEOUT) {
+        Serial.print("AT");
+        connected = false;
     }
 
     msgHandler->loop();
