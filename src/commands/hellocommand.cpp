@@ -46,6 +46,10 @@ void HelloCommand::run(char** command, LEDController& controller) {
     Serial.print(config.stretch);
     Serial.print(' ');
 
+    // Palette mode
+    Serial.print(config.mode);
+    Serial.print(' ');
+
     // Palette blending
     // NOBLEND = 0
     // LINEARBLEND = 1
