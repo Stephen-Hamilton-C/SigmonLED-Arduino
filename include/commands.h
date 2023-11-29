@@ -68,7 +68,7 @@ public:
         }
         if(Util::strStartsWith(command, "custom")) {
             return CommandInfo {
-                argCount: 49,
+                argCount: 5,
                 command: new CustomPaletteCommand()
             };
         }

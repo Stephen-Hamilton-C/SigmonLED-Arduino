@@ -2,17 +2,45 @@
 
 #include "util.h"
 
+CRGB CustomPaletteCommand::colors[16] = {
+    CRGB::Red,
+    CRGB::Gray,
+    CRGB::Blue,
+    CRGB::Black,
+    CRGB::Red,
+    CRGB::Gray,
+    CRGB::Blue,
+    CRGB::Black,
+    CRGB::Red,
+    CRGB::Gray,
+    CRGB::Blue,
+    CRGB::Black,
+    CRGB::Red,
+    CRGB::Gray,
+    CRGB::Blue,
+    CRGB::Black
+};
+
+
 void CustomPaletteCommand::run(char** command, LEDController& controller) {
-    // custom 255 255 255 127 127 127 0 0 0
-    CRGB colors[16];
-    for(int i = 0; i < 16; i++) {
-        uint8_t r = Util::parseASCIINumber(command[i*3 + 1]);
-        uint8_t g = Util::parseASCIINumber(command[i*3 + 2]);
-        uint8_t b = Util::parseASCIINumber(command[i*3 + 3]);
-        colors[i] = CRGB(r, g, b);
+    // custom 0 255 255 255
+    // custom 1 0 0 0
+    // ...
+    // custom 15 0 0 0
+
+    uint8_t index = Util::parseASCIINumber(command[1]);
+    if(index > 15) {
+        return;
     }
-    CRGBPalette16 palette = CRGBPalette16(colors);
+
+    uint8_t r = Util::parseASCIINumber(command[2]);
+    uint8_t g = Util::parseASCIINumber(command[3]);
+    uint8_t b = Util::parseASCIINumber(command[4]);
+
+    CustomPaletteCommand::colors[index] = CRGB(r, g, b);
+
+    CRGBPalette16 palette = CRGBPalette16(CustomPaletteCommand::colors);
     controller.customPalette = palette;
-    controller.setPalette(palette, PaletteType::CUSTOM);
-    controller.setMode(LEDController::Mode::PALETTE);
+    // controller.setPalette(palette, PaletteType::CUSTOM);
+    // controller.setMode(LEDController::Mode::PALETTE);
 }
