@@ -46,7 +46,9 @@ void loop() {
     }
 
     if(connected && millis() - lastMessageTimestamp >= CONNECTION_TIMEOUT) {
-        Serial.print("AT");
+        if(TIMEOUT_MESSAGE != 0) {
+            Serial.print(TIMEOUT_MESSAGE);
+        }
         connected = false;
     }
 
