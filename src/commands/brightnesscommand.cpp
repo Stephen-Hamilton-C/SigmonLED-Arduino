@@ -1,12 +1,8 @@
 #include "commands/brightnesscommand.h"
 
-BrightnessCommand::BrightnessCommand(LEDController& controller): Command(controller) {}
+#include "util.h"
 
-void BrightnessCommand::fire(uint8_t* argArray) {
-    const uint8_t brightness = argArray[1];
-    _controller.setBrightness(brightness);
-}
-
-uint8_t BrightnessCommand::requiredArgs() {
-    return 1;
+void BrightnessCommand::run(char** command, LEDController& controller) {
+    uint8_t brightness = Util::parseASCIINumber(command[1]);
+    controller.setBrightness(brightness);
 }

@@ -1,12 +1,8 @@
 #include "commands/blendingcommand.h"
 
-BlendingCommand::BlendingCommand(LEDController& controller): Command(controller) {}
+#include "util.h"
 
-void BlendingCommand::fire(uint8_t* argArray) {
-    const uint8_t blending = argArray[1];
-    _controller.setPaletteBlending(blending);
-}
-
-uint8_t BlendingCommand::requiredArgs() {
-    return 1;
+void BlendingCommand::run(char** command, LEDController& controller) {
+    bool blendType = Util::parseASCIINumber(command[1]);
+    controller.setPaletteBlending(blendType);
 }

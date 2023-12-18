@@ -1,9 +1,9 @@
-#ifndef DELAYCOMMAND_H
-#define DELAYCOMMAND_H
+#ifndef HELLOCOMMAND_H
+#define HELLOCOMMAND_H
 
 #include "commands/command.h"
 
-class DelayCommand : public Command {
+class HelloCommand : public Command {
 public:
     void run(char** command, LEDController& controller);
 };

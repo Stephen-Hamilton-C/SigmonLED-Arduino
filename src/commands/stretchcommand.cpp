@@ -1,12 +1,9 @@
 #include "commands/stretchcommand.h"
 
-StretchCommand::StretchCommand(LEDController& controller): Command(controller) {}
+#include "util.h"
 
-void StretchCommand::fire(uint8_t* argArray) {
-    const uint8_t stretch = argArray[1];
-    _controller.setPaletteStretch(stretch);
-}
-
-uint8_t StretchCommand::requiredArgs() {
-    return 1;
+void StretchCommand::run(char** command, LEDController& controller) {
+    uint8_t stretch = Util::parseASCIINumber(command[1]);
+    controller.setPaletteStretch(stretch);
+    controller.setMode(LEDController::Mode::PALETTE);
 }

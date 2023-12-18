@@ -1,17 +1,12 @@
 #include "commands/colorcommand.h"
 
-ColorCommand::ColorCommand(LEDController& controller): Command(controller) {}
+#include <Arduino.h>
+#include "util.h"
 
-void ColorCommand::fire(uint8_t* argArray) {
-    const uint8_t r = argArray[1];
-    const uint8_t g = argArray[2];
-    const uint8_t b = argArray[3];
-
-    const CRGB color(r, g, b);
-    _controller.setColor(color);
-    _controller.setMode(LEDController::Mode::COLOR);
-}
-
-uint8_t ColorCommand::requiredArgs() {
-    return 3;
+void ColorCommand::run(char** command, LEDController& controller) {
+    int red = Util::parseASCIINumber(command[1]);
+    int green = Util::parseASCIINumber(command[2]);
+    int blue = Util::parseASCIINumber(command[3]);
+    controller.setColor(CRGB(red, green, blue));
+    controller.setMode(LEDController::Mode::COLOR);
 }

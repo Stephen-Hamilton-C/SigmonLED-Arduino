@@ -1,15 +1,12 @@
 #include "commands/palettemodecommand.h"
 
-PaletteModeCommand::PaletteModeCommand(LEDController &controller): Command(controller) {}
+#include "util.h"
 
-void PaletteModeCommand::fire(uint8_t* argArray) {
-    const uint8_t rawPaletteMode = argArray[1];
-
-    PaletteMode paletteMode = (PaletteMode) rawPaletteMode;
-    _controller.setPaletteMode(paletteMode);
-    _controller.setMode(LEDController::Mode::PALETTE);
-}
-
-uint8_t PaletteModeCommand::requiredArgs() {
-    return 1;
+void PaletteModeCommand::run(char** command, LEDController& controller) {
+    uint8_t paletteMode = Util::parseASCIINumber(command[1]);
+    if(paletteMode > 2) {
+        paletteMode = PaletteMode::SCROLLING;
+    }
+    controller.setPaletteMode((PaletteMode)paletteMode);
+    controller.setMode(LEDController::Mode::PALETTE);
 }

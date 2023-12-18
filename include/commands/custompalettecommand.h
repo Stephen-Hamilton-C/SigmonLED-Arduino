@@ -1,13 +1,12 @@
 #ifndef CUSTOMPALETTECOMMAND_H
 #define CUSTOMPALETTECOMMAND_H
 
-#include "command.h"
+#include "commands/command.h"
 
-class CustomPaletteCommand: public Command {
+class CustomPaletteCommand : public Command {
 public:
-    CustomPaletteCommand(LEDController& controller);
-    void fire(uint8_t* argArray);
-    uint8_t requiredArgs();
+    void run(char** command, LEDController& controller);
+    static CRGB colors[16];
 };
 
 #endif

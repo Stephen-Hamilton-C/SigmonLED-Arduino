@@ -1,18 +1,11 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include <stdint.h>
-#include <ledcontroller.h>
+#include "ledcontroller.h"
 
 class Command {
 public:
-    Command(LEDController& controller);
-    virtual ~Command();
-    virtual void fire(uint8_t* argArray) = 0;
-    virtual uint8_t requiredArgs() = 0;
-
-protected:
-    LEDController& _controller;
+    virtual void run(char** command, LEDController& controller) = 0;
 };
 
 #endif
