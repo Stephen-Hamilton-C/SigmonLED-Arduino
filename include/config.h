@@ -16,6 +16,10 @@
 
 #define MESSAGE_BUFFER 128
 /**
+ * @brief Which pin your IR remote sensor is plugged into
+ */
+#define IR_PIN 7
+/**
  * @brief Which pin your LED data wire is plugged into.
 */
 #define LED_PIN 6

@@ -3,9 +3,12 @@
 // but I have further ambitions that would further SigmonLED.
 
 #include <Arduino.h>
+// TODO: Need to install IRremote
+// #include <IRremote.h>
 #include "messagehandler.h"
 #include "config.h"
 
+IRrecv irReceiver(IR_PIN);
 MessageHandler* msgHandler;
 char buffer[MESSAGE_BUFFER];
 int bufferLen = 0;
@@ -15,15 +18,27 @@ bool connected = false;
 void setup() {
     // Setup Serial interfaces
     Serial.begin(SERIAL_BAUD);
+    // TODO: Can command message handler coexist with IR?
     msgHandler = new MessageHandler();
 
     // Disable the built-in LED
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
+
+    irReceiver.enableIRIn();
+    irReceiver.blink13(true);
 }
 
 void loop() {
     // Handle input
+    // Remote input from IR
+    decode_results results;
+    if(irReceiver.decode(&results)) {
+        Serial.println(results.value, HEX);
+        irReceiver.resume();
+    }
+
+    // Command input from Serial
     while(Serial.available()) {
         connected = true;
         lastMessageTimestamp = millis();
