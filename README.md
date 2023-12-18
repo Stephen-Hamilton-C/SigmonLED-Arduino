@@ -1,3 +1,9 @@
+# WARNING
+**This readme is out of date!**
+These instructions only apply to legacy v2 versions of SigmonLED-Arduino.
+
+This will be rewritten soon!
+
 # SigmonLED-Arduino
 
 This code turns your Arduino into a WS2811 LED controller. Controlled using UART, although it was designed for HM-10 BLE modules.
