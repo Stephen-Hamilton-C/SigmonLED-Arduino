@@ -8,6 +8,12 @@
 
 #define VERSION "3.0.0"
 
+/**
+ * @brief What to send to serial after a connection times out.
+ * If this is set to 0, ignore.
+ */
+#define TIMEOUT_MESSAGE "AT"
+
 #define MESSAGE_BUFFER 128
 /**
  * @brief Which pin your LED data wire is plugged into.
