@@ -31,6 +31,9 @@ public:
     void setPaletteStretch(const uint8_t& stretch);
     void setPaletteBlending(const bool& blending);
 
+    void setGradient(const CRGB& start, const CRGB& end);
+    void distributePalette(const CRGBPalette16& palette);
+
     const PaletteConfig& getPaletteConfig();
 
     CRGBPalette16 customPalette = CRGBPalette16(CRGB::Black);
@@ -53,6 +56,7 @@ private:
     };
 
     void setPaletteStaticColor();
+    uint8_t calculateGradientPixel(const int i, const uint8_t final, const uint8_t initial);
 };
 
 #endif
