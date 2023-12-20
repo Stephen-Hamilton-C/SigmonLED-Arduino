@@ -3,8 +3,7 @@
 // but I have further ambitions that would further SigmonLED.
 
 #include <Arduino.h>
-// TODO: Need to install IRremote
-// #include <IRremote.h>
+#include <IRremote.h>
 #include "messagehandler.h"
 #include "config.h"
 
@@ -25,16 +24,19 @@ void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
 
-    irReceiver.enableIRIn();
-    irReceiver.blink13(true);
+    irReceiver.start();
 }
 
 void loop() {
     // Handle input
+    if(msgHandler->getController().updateQueued && IrReceiver.isIdle()) {
+        msgHandler->getController().updateQueued = false;
+        FastLED.show();
+    }
+
     // Remote input from IR
-    decode_results results;
-    if(irReceiver.decode(&results)) {
-        Serial.println(results.value, HEX);
+    if(irReceiver.decode()) {
+        Serial.println(irReceiver.decodedIRData.decodedRawData, HEX);
         irReceiver.resume();
     }
 

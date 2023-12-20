@@ -14,6 +14,8 @@ public:
         PALETTE,
     };
 
+    bool updateQueued = false;
+
     LEDController();
     void loop();
     void paletteLoop();
@@ -57,6 +59,7 @@ private:
 
     void setPaletteStaticColor();
     uint8_t calculateGradientPixel(const int i, const uint8_t final, const uint8_t initial);
+    void updateStrip();
 };
 
 #endif

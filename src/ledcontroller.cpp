@@ -25,7 +25,7 @@ void LEDController::paletteLoop() {
                     _leds[i] = ColorFromPalette(_paletteConfig.palette, colorIndex, 255, _paletteConfig.blending);
                     colorIndex += _paletteConfig.stretch;
                 }
-                FastLED.show();
+                updateStrip();
                 break;
             }
             case PaletteMode::SOLID: {
@@ -33,7 +33,7 @@ void LEDController::paletteLoop() {
                     _leds[i] = ColorFromPalette(_paletteConfig.palette, colorIndex, 255, _paletteConfig.blending);
                 }
                 colorIndex += _paletteConfig.stretch;
-                FastLED.show();
+                updateStrip();
                 break;
             }
             case PaletteMode::STATIC: return; // Do nothing for STATIC as it will be set when palettes and modes are set
@@ -47,7 +47,7 @@ void LEDController::setMode(const Mode &mode) {
     _currentMode = mode;
     if(_currentMode == Mode::COLOR) {
         FastLED.setBrightness(255);
-        FastLED.show();
+        updateStrip();
     } else {
         setBrightness(_brightness);
     }
@@ -58,13 +58,13 @@ void LEDController::setColor(const CRGB &color) {
     for (int i = 0; i < LED_COUNT; i++) {
         _leds[i] = color;
     }
-    FastLED.show();
+    updateStrip();
 }
 
 void LEDController::setBrightness(const uint8_t &brightness) {
     _brightness = brightness;
     FastLED.setBrightness(brightness);
-    FastLED.show();
+    updateStrip();
 }
 
 void LEDController::setPalette(const CRGBPalette16 &palette, const PaletteType& type) {
@@ -96,7 +96,7 @@ void LEDController::setGradient(const CRGB& start, const CRGB& end) {
     // Could end up with divide by zero if there's only one LED
     if(LED_COUNT == 1) {
         _leds[0] = start;
-        // TODO: Queue update
+        updateStrip();
         return;
     }
 
@@ -109,7 +109,7 @@ void LEDController::setGradient(const CRGB& start, const CRGB& end) {
         );
     }
     _leds[LED_COUNT - 1] = end;
-    // TODO: Queue update
+    updateStrip();
 }
 
 uint8_t LEDController::calculateGradientPixel(const int i, const uint8_t final, const uint8_t initial) {
@@ -126,7 +126,7 @@ void LEDController::distributePalette(const CRGBPalette16& palette) {
     // Could end up with divide by zero if there's only one LED
     if(LED_COUNT == 1) {
         _leds[0] = ColorFromPalette(palette, 0);
-        // TODO: Queue update
+        updateStrip();
         return;
     }
 
@@ -137,7 +137,7 @@ void LEDController::distributePalette(const CRGBPalette16& palette) {
         float percentage = i / (LED_COUNT - 1);
         _leds[i] = ColorFromPalette(palette, 255 * percentage);
     }
-    // TODO: Queue update
+    updateStrip();
 }
 
 void LEDController::setPaletteStaticColor() {
@@ -148,7 +148,7 @@ void LEDController::setPaletteStaticColor() {
         _leds[i] = ColorFromPalette(_paletteConfig.palette, colorIndex, 255, _paletteConfig.blending);
         colorIndex += _paletteConfig.stretch;
     }
-    FastLED.show();
+    updateStrip();
 }
 
 const LEDController::Mode LEDController::getMode() {
@@ -165,4 +165,8 @@ const uint8_t LEDController::getBrightness() {
 
 const PaletteConfig& LEDController::getPaletteConfig() {
     return _paletteConfig;
+}
+
+void LEDController::updateStrip() {
+    updateQueued = true;
 }

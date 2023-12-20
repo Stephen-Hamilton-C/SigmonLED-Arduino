@@ -15,6 +15,10 @@ void MessageHandler::loop() {
     _controller.loop();
 }
 
+LEDController& MessageHandler::getController() {
+    return _controller;
+}
+
 void MessageHandler::processMessage(char message[], int messageLen) {
     switch(_currentState) {
         case State::RECEIVE: {

@@ -15,6 +15,7 @@ class MessageHandler {
 public:
     void processMessage(char message[], int messageLen);
     void loop();
+    LEDController& getController();
 
     enum State {
         RECEIVE,
