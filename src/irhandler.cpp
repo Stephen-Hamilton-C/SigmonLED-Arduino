@@ -96,63 +96,137 @@ void IRHandler::loop() {
     }
 }
 
-void IRHandler::off() {
-    _controller->setColor(CRGB::Black);
-}
-
 void IRHandler::handleInput(const uint32_t input) {
+    // TODO:
+    // if(off) {
+    //     turnOn();
+    //     return;
+    // }
+
     switch(_lastInput) {
         case IRIN_1:
             // 1
+            handleDigit(1);
             break;
         case IRIN_2:
             // 2
+            handleDigit(2);
             break;
         case IRIN_3:
             // 3
+            handleDigit(3);
             break;
         case IRIN_4:
             // 4
+            handleDigit(4);
             break;
         case IRIN_5:
             // 5
+            handleDigit(5);
             break;
         case IRIN_6:
             // 6
+            handleDigit(6);
             break;
         case IRIN_7:
             // 7
+            handleDigit(7);
             break;
         case IRIN_8:
             // 8
+            handleDigit(8);
             break;
         case IRIN_9:
             // 9
+            handleDigit(9);
             break;
         case IRIN_0:
             // 0
+            handleDigit(10);
             break;
         case IRIN_COLOR:
             // COLOR
+            handleColor();
             break;
         case IRIN_MODE:
             // MODE
+            handleSwitchMode();
             break;
         case IRIN_LEFT:
             // LEFT
+            handleSwitchValueType(-1);
             break;
         case IRIN_RIGHT:
             // RIGHT
+            handleSwitchValueType(1);
             break;
         case IRIN_UP:
             // UP
+            handleValueIncrement(1);
             break;
         case IRIN_DOWN:
             // DOWN
+            handleValueIncrement(-1);
             break;
         case IRIN_OK:
             // OK
-            _controller->distributePalette(RainbowColors_p);
+            // TODO: turnOff();
             break;
     }
+}
+
+void IRHandler::handleDigit(const uint8_t digit) {
+    _incrementMagnitude = digit;
+}
+
+void IRHandler::handleValueIncrement(const int8_t direction) {
+    switch(_currentType) {
+        case BRIGHTNESS: {
+            // Don't need to worry about wraparound in this case
+            uint8_t brightness = _controller->getBrightness();
+            _controller->setBrightness(brightness + (direction * _incrementMagnitude));
+            break;
+        }
+        case PALETTE_TYPE: {
+            PaletteConfig config = _controller->getPaletteConfig();
+            PaletteType type = config.type;
+            if(type <= 0 && direction < 0) {
+                type = PALETTETYPE_MAX;
+            } else if(type >= PALETTETYPE_MAX && direction > 0) {
+                type = 0;
+            } else {
+                type += direction;
+            }
+
+            _controller->setPalette(type);
+            break;
+        }
+    }
+}
+
+void IRHandler::handleSwitchValueType(const int8_t direction) {
+    switch(_controller->getMode()) {
+        case LEDController::Mode::PALETTE: {
+            if(_currentType <= 0 && direction < 0) {
+                _currentType = VALUETYPE_MAX;
+            } else if(_currentType >= VALUETYPE_MAX && direction > 0) {
+                _currentType = 0;
+            } else {
+                _currentType += direction;
+            }
+            break;
+        }
+        case LEDController::Mode::COLOR_SELECT: {
+            // TODO
+            break;
+        }
+    }
+}
+
+void IRHandler::handleSwitchMode() {
+    if(_controller->getMode() == LEDController::Mode::COLOR_SELECT) return;
+}
+
+void IRHandler::handleColor() {
+    // TODO
 }
