@@ -3,6 +3,10 @@
 #include "commands.h"
 
 // Public
+MessageHandler::MessageHandler(LEDController* controller) {
+    _controller = controller;
+}
+
 void MessageHandler::loop() {
     if (_currentState == State::ACKNOWLEDGE) {
         if(millis() - _lastMessageTimestamp >= MESSAGE_TIMEOUT) {
@@ -12,11 +16,7 @@ void MessageHandler::loop() {
         }
     }
 
-    _controller.loop();
-}
-
-LEDController& MessageHandler::getController() {
-    return _controller;
+    _controller->loop();
 }
 
 void MessageHandler::processMessage(char message[], int messageLen) {

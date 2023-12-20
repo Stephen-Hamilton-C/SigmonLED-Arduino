@@ -2,7 +2,7 @@
 
 #include "util.h"
 
-void PaletteCommand::run(char** command, LEDController& controller) {
+void PaletteCommand::run(char** command, LEDController* controller) {
     uint8_t paletteType = Util::parseASCIINumber(command[1]);
     CRGBPalette16 palette;
     switch(paletteType) {
@@ -26,9 +26,9 @@ void PaletteCommand::run(char** command, LEDController& controller) {
             break;
         default:
             paletteType = PaletteType::CUSTOM;
-            palette = controller.customPalette;
+            palette = controller->customPalette;
             break;
     }
-    controller.setPalette(palette, (PaletteType)paletteType);
-    controller.setMode(LEDController::Mode::PALETTE);
+    controller->setPalette(palette, (PaletteType)paletteType);
+    controller->setMode(LEDController::Mode::PALETTE);
 }

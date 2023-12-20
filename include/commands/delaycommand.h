@@ -5,7 +5,7 @@
 
 class DelayCommand : public Command {
 public:
-    void run(char** command, LEDController& controller);
+    void run(char** command, LEDController* controller);
 };
 
 #endif

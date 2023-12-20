@@ -2,7 +2,6 @@
 #define LEDCONTROLLER_H
 
 #include <FastLED.h>
-#include <SoftwareSerial.h>
 #include "config.h"
 #include "palettemode.h"
 #include "paletteconfig.h"

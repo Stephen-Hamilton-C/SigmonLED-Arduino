@@ -13,9 +13,9 @@
 
 class MessageHandler {
 public:
+    MessageHandler(LEDController* controller);
     void processMessage(char message[], int messageLen);
     void loop();
-    LEDController& getController();
 
     enum State {
         RECEIVE,
@@ -32,7 +32,7 @@ private:
     char** _currentMessage = NULL;
     unsigned long _lastMessageTimestamp;
 
-    LEDController _controller;
+    LEDController* _controller;
 };
 
 #endif

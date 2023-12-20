@@ -5,7 +5,7 @@
 
 class Command {
 public:
-    virtual void run(char** command, LEDController& controller) = 0;
+    virtual void run(char** command, LEDController* controller) = 0;
 };
 
 #endif
