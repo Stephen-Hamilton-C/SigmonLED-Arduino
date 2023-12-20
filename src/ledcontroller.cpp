@@ -134,7 +134,7 @@ void LEDController::distributePalette(const CRGBPalette16& palette) {
     // i / LED_COUNT = percentage
     // 255 * percentage
     for(int i = 0; i < LED_COUNT; i++) {
-        float percentage = i / (LED_COUNT - 1);
+        float percentage = (float)i / (LED_COUNT - 1);
         _leds[i] = ColorFromPalette(palette, 255 * percentage);
     }
     updateStrip();
