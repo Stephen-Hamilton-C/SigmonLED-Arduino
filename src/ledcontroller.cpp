@@ -67,8 +67,30 @@ void LEDController::setBrightness(const uint8_t &brightness) {
     updateStrip();
 }
 
-void LEDController::setPalette(const CRGBPalette16 &palette, const PaletteType& type) {
-    _paletteConfig.palette = palette;
+void LEDController::setPalette(const PaletteType& type) {
+    switch(type) {
+        case PaletteType::RAINBOW:
+            _paletteConfig.palette = RainbowColors_p;
+            break;
+        case PaletteType::RAINBOW_STRIPE:
+            _paletteConfig.palette = RainbowStripeColors_p;
+            break;
+        case PaletteType::PARTY:
+            _paletteConfig.palette = PartyColors_p;
+            break;
+        case PaletteType::OCEAN:
+            _paletteConfig.palette = OceanColors_p;
+            break;
+        case PaletteType::LAVA:
+            _paletteConfig.palette = LavaColors_p;
+            break;
+        case PaletteType::FOREST:
+            _paletteConfig.palette = ForestColors_p;
+            break;
+        default:
+            _paletteConfig.palette = controller->customPalette;
+            break;
+    }
     _paletteConfig.type = type;
     setPaletteStaticColor();
 }
@@ -93,6 +115,8 @@ void LEDController::setPaletteBlending(const bool &blending) {
 }
 
 void LEDController::setGradient(const CRGB& start, const CRGB& end) {
+    setMode(Mode::COLOR);
+
     // Could end up with divide by zero if there's only one LED
     if(LED_COUNT == 1) {
         _leds[0] = start;
@@ -123,6 +147,8 @@ uint8_t LEDController::calculateGradientPixel(const int i, const uint8_t final, 
 }
 
 void LEDController::distributePalette(const CRGBPalette16& palette) {
+    setMode(Mode::COLOR);
+
     // Could end up with divide by zero if there's only one LED
     if(LED_COUNT == 1) {
         _leds[0] = ColorFromPalette(palette, 0);

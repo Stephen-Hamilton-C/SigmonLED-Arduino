@@ -41,6 +41,6 @@ void CustomPaletteCommand::run(char** command, LEDController* controller) {
 
     CRGBPalette16 palette = CRGBPalette16(CustomPaletteCommand::colors);
     controller->customPalette = palette;
-    // controller.setPalette(palette, PaletteType::CUSTOM);
+    // controller.setPalette(PaletteType::CUSTOM);
     // controller.setMode(LEDController::Mode::PALETTE);
 }

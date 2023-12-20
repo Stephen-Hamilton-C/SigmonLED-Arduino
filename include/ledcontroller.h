@@ -11,6 +11,7 @@ public:
     enum Mode {
         COLOR,
         PALETTE,
+        COLOR_SELECT,
     };
 
     bool updateQueued = false;
@@ -26,7 +27,7 @@ public:
     const uint8_t getBrightness();
     void setBrightness(const uint8_t& brightness);
 
-    void setPalette(const CRGBPalette16& palette, const PaletteType& type);
+    void setPalette(const PaletteType& type);
     void setPaletteMode(const PaletteMode& mode);
     void setPaletteDelay(const uint16_t& delay);
     void setPaletteStretch(const uint8_t& stretch);
