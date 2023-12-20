@@ -191,11 +191,11 @@ void IRHandler::handleValueIncrement(const int8_t direction) {
             PaletteConfig config = _controller->getPaletteConfig();
             PaletteType type = config.type;
             if(type <= 0 && direction < 0) {
-                type = PALETTETYPE_MAX;
+                type = (PaletteType)PALETTETYPE_MAX;
             } else if(type >= PALETTETYPE_MAX && direction > 0) {
-                type = 0;
+                type = (PaletteType)0;
             } else {
-                type += direction;
+                type = (PaletteType)(type + direction);
             }
 
             _controller->setPalette(type);
@@ -208,11 +208,11 @@ void IRHandler::handleSwitchValueType(const int8_t direction) {
     switch(_controller->getMode()) {
         case LEDController::Mode::PALETTE: {
             if(_currentType <= 0 && direction < 0) {
-                _currentType = VALUETYPE_MAX;
+                _currentType = (ValueType)VALUETYPE_MAX;
             } else if(_currentType >= VALUETYPE_MAX && direction > 0) {
-                _currentType = 0;
+                _currentType = (ValueType)0;
             } else {
-                _currentType += direction;
+                _currentType = (ValueType)(_currentType + direction);
             }
             break;
         }

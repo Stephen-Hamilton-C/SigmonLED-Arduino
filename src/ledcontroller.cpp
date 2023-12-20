@@ -88,7 +88,7 @@ void LEDController::setPalette(const PaletteType& type) {
             _paletteConfig.palette = ForestColors_p;
             break;
         default:
-            _paletteConfig.palette = controller->customPalette;
+            _paletteConfig.palette = customPalette;
             break;
     }
     _paletteConfig.type = type;
