@@ -4,8 +4,8 @@
 #include "ledcontroller.h"
 #include "paralleltimer.h"
 
-#define VALUETYPE_MAX 2
-#define PALETTETYPE_MAX 5
+#define VALUETYPE_MAX 3
+#define PALETTETYPE_MAX 6
 
 class IRHandler {
 public:
@@ -17,23 +17,28 @@ private:
     enum ValueType {
         BRIGHTNESS,
         PALETTE_TYPE,
+        DELAY,
+        STRETCH,
     };
 
     uint32_t _lastInput = 0;
+    bool _lastInputRepeat = false;
     uint64_t _lastDataTimestamp = 0;
 
     void printInput(const uint32_t input);
-    void handleInput(const uint32_t input);
+    void handleInput();
     void handleDigit(const uint8_t digit);
     void handleValueIncrement(const int8_t direction);
     void handleSwitchValueType(const int8_t direction);
-    void handleSwitchMode();
-    // TODO: Read the paper, what did IRIN_COLOR do? Need better name
-    void handleColor();
+    void handleSelect();
+    void handleModeSwitch();
+    void blink(const uint8_t times, const uint16_t interval);
 
     LEDController* _controller;
-    uint8_t _incrementMagnitude = 5;
+    uint8_t _incrementMagnitude = MAX_INCREMENT / 2;
     ValueType _currentType = ValueType::BRIGHTNESS;
+    bool _blinking = false;
+
 };
 
 #endif

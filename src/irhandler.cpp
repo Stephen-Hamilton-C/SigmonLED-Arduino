@@ -81,8 +81,13 @@ void IRHandler::printInput(const uint32_t input) {
 
 void IRHandler::loop() {
     if(irReceiver->decode()) {
+        if(_blinking) {
+            irReceiver->resume();
+            return;
+        }
+
         if(irReceiver->decodedIRData.decodedRawData == IRIN_REPEAT) {
-            if(millis() - _lastDataTimestamp >= 500) {
+            if(millis() - _lastDataTimestamp >= IR_TIMEOUT) {
                 irReceiver->resume();
                 return;
             }
@@ -90,19 +95,21 @@ void IRHandler::loop() {
             _lastInput = irReceiver->decodedIRData.decodedRawData;
         }
         _lastDataTimestamp = millis();
+        _lastInputRepeat = irReceiver->decodedIRData.decodedRawData == IRIN_REPEAT;
         printInput(irReceiver->decodedIRData.decodedRawData);
-        handleInput(irReceiver->decodedIRData.decodedRawData);
+        handleInput();
         irReceiver->resume();
     }
 }
 
-void IRHandler::handleInput(const uint32_t input) {
+void IRHandler::handleInput() {
     // TODO:
     // if(off) {
     //     turnOn();
     //     return;
     // }
 
+    digitalWrite(LED_BUILTIN, LOW);
     switch(_lastInput) {
         case IRIN_1:
             // 1
@@ -146,11 +153,11 @@ void IRHandler::handleInput(const uint32_t input) {
             break;
         case IRIN_COLOR:
             // COLOR
-            handleColor();
+            handleModeSwitch();
             break;
         case IRIN_MODE:
             // MODE
-            handleSwitchMode();
+            handleSelect();
             break;
         case IRIN_LEFT:
             // LEFT
@@ -172,22 +179,37 @@ void IRHandler::handleInput(const uint32_t input) {
             // OK
             // TODO: turnOff();
             break;
+        default:
+            digitalWrite(LED_BUILTIN, HIGH);
+            break;
     }
 }
 
 void IRHandler::handleDigit(const uint8_t digit) {
-    _incrementMagnitude = digit;
+    if(digit == 1) {
+        _incrementMagnitude = 1;
+    } else {
+        _incrementMagnitude = (digit / (float)10) * MAX_INCREMENT;
+    }
 }
 
 void IRHandler::handleValueIncrement(const int8_t direction) {
     switch(_currentType) {
         case BRIGHTNESS: {
-            // Don't need to worry about wraparound in this case
-            uint8_t brightness = _controller->getBrightness();
-            _controller->setBrightness(brightness + (direction * _incrementMagnitude));
+            int16_t brightness = _controller->getBrightness();
+            brightness += direction * _incrementMagnitude;
+            if(brightness > 255) {
+                brightness = 255;
+            } else if(brightness < 0) {
+                brightness = 0;
+            }
+            _controller->setBrightness(brightness);
             break;
         }
         case PALETTE_TYPE: {
+            // Disable held inputs
+            if(_lastInputRepeat) break;
+
             PaletteConfig config = _controller->getPaletteConfig();
             PaletteType type = config.type;
             if(type <= 0 && direction < 0) {
@@ -201,10 +223,37 @@ void IRHandler::handleValueIncrement(const int8_t direction) {
             _controller->setPalette(type);
             break;
         }
+        case DELAY: {
+            PaletteConfig config = _controller->getPaletteConfig();
+            int32_t delay = config.delay;
+            delay += direction * -_incrementMagnitude;
+            if(delay > 65535) {
+                delay = 65535;
+            } else if(delay < 0) {
+                delay = 0;
+            }
+            _controller->setPaletteDelay(delay);
+            break;
+        }
+        case STRETCH: {
+            PaletteConfig config = _controller->getPaletteConfig();
+            int16_t stretch = config.stretch;
+            stretch += direction;
+            if(stretch > 255) {
+                stretch = 255;
+            } else if(stretch < 0) {
+                stretch = 0;
+            }
+            _controller->setPaletteStretch(stretch);
+            break;
+        }
     }
 }
 
 void IRHandler::handleSwitchValueType(const int8_t direction) {
+    // Disable held inputs
+    if(_lastInputRepeat) return;
+
     switch(_controller->getMode()) {
         case LEDController::Mode::PALETTE: {
             if(_currentType <= 0 && direction < 0) {
@@ -214,6 +263,7 @@ void IRHandler::handleSwitchValueType(const int8_t direction) {
             } else {
                 _currentType = (ValueType)(_currentType + direction);
             }
+            blink(((uint8_t)_currentType)+1, 300);
             break;
         }
         case LEDController::Mode::COLOR_SELECT: {
@@ -223,10 +273,37 @@ void IRHandler::handleSwitchValueType(const int8_t direction) {
     }
 }
 
-void IRHandler::handleSwitchMode() {
-    if(_controller->getMode() == LEDController::Mode::COLOR_SELECT) return;
+void IRHandler::handleSelect() {
+    // Disable held inputs
+    if(_lastInputRepeat) return;
+
+    if(_controller->getMode() == LEDController::Mode::PALETTE) {
+        PaletteConfig config = _controller->getPaletteConfig();
+        _controller->setPaletteBlending(!config.blending);
+    }
 }
 
-void IRHandler::handleColor() {
-    // TODO
+void IRHandler::handleModeSwitch() {
+    // Disable held inputs
+    if(_lastInputRepeat) return;
+
+    if(_controller->getMode() == LEDController::Mode::COLOR) {
+        _controller->setMode(LEDController::Mode::PALETTE);
+    } else if(_controller->getMode() == LEDController::Mode::PALETTE) {
+        _controller->setMode(LEDController::Mode::COLOR);
+        _controller->setColor(_controller->getColor());
+    }
+}
+
+void IRHandler::blink(const uint8_t times, const uint16_t interval) {
+    if(_blinking) return;
+
+    _blinking = true;
+    for(uint8_t i = 0; i < times; i++) {
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(interval / 2);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(interval / 2);
+    }
+    _blinking = false;
 }

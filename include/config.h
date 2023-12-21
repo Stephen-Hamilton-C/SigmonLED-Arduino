@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <FastLED.h>
 
-#define ECHO true
+#define ECHO false
 
-#define VERSION "3.0.0"
+#define VERSION "3.1.0"
 
 /**
  * @brief What to send to serial after a connection times out.
@@ -41,14 +41,26 @@
 #define LED_COLOR_CORRECTION LEDColorCorrection::TypicalLEDStrip
 
 /**
- * @brief How long to wait in milliseconds before timing out the connection.
+ * @brief How long to wait in milliseconds before timing out the Serial connection.
 */
 #define CONNECTION_TIMEOUT 180000
 
+/**
+ * @brief How long to wait for a response to command verification
+ * before disregarding the command.
+*/
 #define MESSAGE_TIMEOUT 5000
 /**
+ * @brief The maximum time in milliseconds between IR pulses to ignore IRIN_REPEAT messages
+*/
+#define IR_TIMEOUT 200
+/**
+ * @brief The maximum increment magnitude value for IR inputs
+*/
+#define MAX_INCREMENT 20
+/**
  * @brief The desired baud rate for the hardware serial port
- * For HM10 BLE modules, to go into 19200 baud mode, send `AT+BAUD1`.
+ * Send `AT+BAUD1` to go into 19200 baud mode on HM10 BLE modules.
  * It's recommended to set the baud on the module before connecting it to the Arduino.
  * Otherwise, HM10s default to 9600
 */

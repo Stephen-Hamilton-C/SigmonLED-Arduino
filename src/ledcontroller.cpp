@@ -46,7 +46,6 @@ void LEDController::paletteLoop() {
 void LEDController::setMode(const Mode &mode) {
     _currentMode = mode;
     if(_currentMode == Mode::COLOR) {
-        FastLED.setBrightness(255);
         updateStrip();
     } else {
         setBrightness(_brightness);
