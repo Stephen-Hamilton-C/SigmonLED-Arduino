@@ -27,7 +27,6 @@ private:
     enum EditorState {
         HUE,
         SATURATION,
-        VALUE,
     };
 
     uint32_t _lastInput = 0;
@@ -46,7 +45,6 @@ private:
     void editStart();
     void editHue();
     void editSaturation();
-    void editBrightness();
     void editEnd();
 
 
@@ -59,7 +57,6 @@ private:
     EditorState _editorState = EditorState::HUE;
     uint8_t _colorHue = 0;
     uint8_t _colorSat = 255;
-    uint8_t _colorVal = 255;
     bool _colorFlash = false;
     CRGB _currentEditColor = CRGB::Red;
     uint64_t _nextFlashTimestamp = 0;

@@ -118,8 +118,9 @@ void IRHandler::loop() {
 }
 
 void IRHandler::handleInput() {
-    // TODO:
     if(!_on) {
+        if(_lastInputRepeat) return;
+
         _on = true;
         _controller->setBrightness(_onBrightness);
         return;
@@ -198,15 +199,15 @@ void IRHandler::handleInput() {
             // OK
             if(_colorEditor) {
                 editEnd();
-            } else {
+            } else if(!_lastInputRepeat) {
                 _onBrightness = _controller->getBrightness();
                 if(_onBrightness == 0) {
-                    _onBrightness = 16;
+                    _controller->setBrightness(255);
+                    break;
                 }
                 _controller->setBrightness(0);
                 _on = false;
             }
-            // TODO: turnOff();
             break;
         default:
             digitalWrite(LED_BUILTIN, HIGH);
@@ -247,20 +248,6 @@ void IRHandler::handleValueIncrement(const int8_t direction) {
                 _currentEditColor = color;
                 break;
             }
-            case EditorState::VALUE: {
-                int16_t newColorVal = _colorVal + direction * _incrementMagnitude;
-                if(newColorVal > 255) {
-                    newColorVal = 255;
-                } else if(newColorVal < 0) {
-                    newColorVal = 0;
-                }
-                _colorVal = newColorVal;
-                CRGB color = CRGB::Black;
-                color.setHSV(_colorHue, _colorSat, _colorVal);
-                _controller->setColor(color);
-                _currentEditColor = color;
-                break;
-            }
         }
         return;
     }
@@ -271,8 +258,8 @@ void IRHandler::handleValueIncrement(const int8_t direction) {
             brightness += direction * _incrementMagnitude;
             if(brightness > 255) {
                 brightness = 255;
-            } else if(brightness < 0) {
-                brightness = 0;
+            } else if(brightness < 2) {
+                brightness = 2;
             }
             _controller->setBrightness(brightness);
             break;
@@ -335,17 +322,9 @@ void IRHandler::handleSwitchValueType(const int8_t direction) {
             }
             case EditorState::SATURATION: {
                 if(direction > 0) {
-                    editBrightness();
-                } else {
-                    editHue();
-                }
-                break;
-            }
-            case EditorState::VALUE: {
-                if(direction > 0) {
                     editEnd();
                 } else {
-                    editSaturation();
+                    editHue();
                 }
                 break;
             }
@@ -418,8 +397,6 @@ void IRHandler::editHue() {
     _blinking = true;
     _editorState = EditorState::HUE;
     _controller->setColor(CRGB::Black);
-    // TODO: Get rid of this
-    _controller->setBrightness(64);
     _controller->forceUpdate();
     delay(EDITOR_OFF_FLASH);
     _controller->distributePalette(RainbowColors_p);
@@ -451,27 +428,9 @@ void IRHandler::editSaturation() {
     _controller->setColor(color);
 }
 
-void IRHandler::editBrightness() {
-    _blinking = true;
-    _editorState = EditorState::VALUE;
-    _controller->setColor(CRGB::Black);
-    _controller->forceUpdate();
-    delay(EDITOR_OFF_FLASH);
-    CRGB color = CRGB::Black;
-    color.setHSV(_colorHue, _colorSat, 255);
-    _controller->setGradient(color, CRGB::Black);
-    _controller->forceUpdate();
-    delay(EDITOR_ON_FLASH);
-    _blinking = false;
-
-    color.setHSV(_colorHue, _colorSat, _colorVal);
-    _currentEditColor = color;
-    _controller->setColor(color);
-}
-
 void IRHandler::editEnd() {
     CRGB color = CRGB::Black;
-    color.setHSV(_colorHue, _colorSat, _colorVal);
+    color.setHSV(_colorHue, _colorSat, 255);
     _controller->setColor(color);
     _colorEditor = false;
 }
