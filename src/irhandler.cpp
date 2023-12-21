@@ -375,6 +375,10 @@ void IRHandler::blink(const uint8_t times, const uint16_t interval) {
     if(_blinking) return;
 
     _blinking = true;
+    if(digitalRead(LED_BUILTIN)) {
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(interval);
+    }
     for(uint8_t i = 0; i < times; i++) {
         digitalWrite(LED_BUILTIN, HIGH);
         delay(interval / 2);
