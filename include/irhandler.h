@@ -4,8 +4,9 @@
 #include "ledcontroller.h"
 #include "paralleltimer.h"
 
-#define VALUETYPE_MAX 3
+#define VALUETYPE_MAX 4
 #define PALETTETYPE_MAX 6
+#define PALETTEMODE_MAX 2
 #define EDITOR_OFF_FLASH 250
 #define EDITOR_ON_FLASH 1000
 #define EDITOR_INTERMITTENT_FLASH_PAUSE 750
@@ -23,6 +24,7 @@ private:
         PALETTE_TYPE,
         DELAY,
         STRETCH,
+        PALETTE_MODE,
     };
     enum EditorState {
         HUE,

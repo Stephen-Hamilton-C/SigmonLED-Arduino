@@ -296,6 +296,20 @@ void IRHandler::handleValueIncrement(const int8_t direction) {
             _controller->setPaletteStretch(stretch);
             break;
         }
+        case ValueType::PALETTE_MODE: {
+            PaletteConfig config = _controller->getPaletteConfig();
+            PaletteMode mode = config.mode;
+            if(mode <= 0 && direction < 0) {
+                mode = (PaletteMode)PALETTEMODE_MAX;
+            } else if(mode >= PALETTEMODE_MAX && direction > 0) {
+                mode = (PaletteMode)0;
+            } else {
+                mode = (PaletteMode)(mode + direction);
+            }
+
+            _controller->setPaletteMode(mode);
+            break;
+        }
     }
 }
 
@@ -332,7 +346,7 @@ void IRHandler::handleSwitchValueType(const int8_t direction) {
     } else {
         _currentType = (ValueType)(_currentType + direction);
     }
-    blink(((uint8_t)_currentType)+1, 300);
+    blink(((uint8_t)_currentType)+1, 250);
 }
 
 void IRHandler::handleSelect() {
