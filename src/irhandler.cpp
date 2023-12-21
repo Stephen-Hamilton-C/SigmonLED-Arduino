@@ -118,14 +118,6 @@ void IRHandler::loop() {
 }
 
 void IRHandler::handleInput() {
-    if(!_on) {
-        if(_lastInputRepeat) return;
-
-        _on = true;
-        _controller->setBrightness(_onBrightness);
-        return;
-    }
-
     digitalWrite(LED_BUILTIN, LOW);
     switch(_lastInput) {
         case IRIN_1:
@@ -200,16 +192,15 @@ void IRHandler::handleInput() {
             if(_colorEditor) {
                 editEnd();
             } else if(!_lastInputRepeat) {
-                _onBrightness = _controller->getBrightness();
-                if(_onBrightness == 0) {
+                if(_controller->getBrightness() == 0) {
                     _controller->setBrightness(255);
-                    break;
+                } else {
+                    _controller->setBrightness(0);
                 }
-                _controller->setBrightness(0);
-                _on = false;
             }
             break;
         default:
+            // Unrecognized input, show error status
             digitalWrite(LED_BUILTIN, HIGH);
             break;
     }
