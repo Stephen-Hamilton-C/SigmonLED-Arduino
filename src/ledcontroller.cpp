@@ -5,7 +5,8 @@ LEDController::LEDController() {
         _leds, LED_COUNT
     ).setCorrection(LED_COLOR_CORRECTION);
     
-    setColor(CRGB::Black);
+    setColor(CRGB::White);
+    setBrightness(0);
 }
 
 void LEDController::loop() {
@@ -56,6 +57,9 @@ void LEDController::setColor(const CRGB &color) {
     _currentColor = color;
     for (int i = 0; i < LED_COUNT; i++) {
         _leds[i] = color;
+    }
+    if(_brightness == 0) {
+        setBrightness(255);
     }
     updateStrip();
 }
