@@ -11,7 +11,6 @@ public:
     enum Mode {
         COLOR,
         PALETTE,
-        COLOR_SELECT,
     };
 
     bool updateQueued = false;
@@ -35,6 +34,7 @@ public:
 
     void setGradient(const CRGB& start, const CRGB& end);
     void distributePalette(const CRGBPalette16& palette);
+    void forceUpdate();
 
     const PaletteConfig& getPaletteConfig();
 

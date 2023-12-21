@@ -195,3 +195,8 @@ const PaletteConfig& LEDController::getPaletteConfig() {
 void LEDController::updateStrip() {
     updateQueued = true;
 }
+
+void LEDController::forceUpdate() {
+    updateQueued = false;
+    FastLED.show();
+}

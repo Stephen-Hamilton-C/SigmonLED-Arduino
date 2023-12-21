@@ -80,6 +80,21 @@ void IRHandler::printInput(const uint32_t input) {
 }
 
 void IRHandler::loop() {
+    // if(_colorEditor) {
+    //     uint64_t now = millis();
+    //     if(now >= _nextFlashTimestamp) {
+    //         if(_colorFlash) {
+    //             _nextFlashTimestamp = now + EDITOR_INTERMITTENT_FLASH_PAUSE;
+    //             _controller->setColor(_currentEditColor);
+    //         } else {
+    //             _nextFlashTimestamp = now + EDITOR_INTERMITTENT_FLASH_OFF;
+    //             _controller->setColor(CRGB::Black);
+    //         }
+
+    //         _colorFlash = !_colorFlash;
+    //     }
+    // }
+
     if(irReceiver->decode()) {
         if(_blinking) {
             irReceiver->resume();
@@ -153,6 +168,9 @@ void IRHandler::handleInput() {
             break;
         case IRIN_COLOR:
             // COLOR
+            if(_colorEditor) {
+                editEnd();
+            }
             handleModeSwitch();
             break;
         case IRIN_MODE:
@@ -177,6 +195,9 @@ void IRHandler::handleInput() {
             break;
         case IRIN_OK:
             // OK
+            if(_colorEditor) {
+                editEnd();
+            }
             // TODO: turnOff();
             break;
         default:
@@ -194,8 +215,50 @@ void IRHandler::handleDigit(const uint8_t digit) {
 }
 
 void IRHandler::handleValueIncrement(const int8_t direction) {
+    if(_colorEditor) {
+        switch(_editorState) {
+            case EditorState::HUE: {
+                _colorHue += direction * _incrementMagnitude;
+                CRGB color = CRGB::Black;
+                color.setHSV(_colorHue, 255, 255);
+                _controller->setColor(color);
+                _currentEditColor = color;
+                break;
+            }
+            case EditorState::SATURATION: {
+                int16_t newColorSat = _colorSat + direction * _incrementMagnitude;
+                if(newColorSat > 255) {
+                    newColorSat = 255;
+                } else if(newColorSat < 0) {
+                    newColorSat = 0;
+                }
+                _colorSat = newColorSat;
+                CRGB color = CRGB::Black;
+                color.setHSV(_colorHue, _colorSat, 255);
+                _controller->setColor(color);
+                _currentEditColor = color;
+                break;
+            }
+            case EditorState::VALUE: {
+                int16_t newColorVal = _colorVal + direction * _incrementMagnitude;
+                if(newColorVal > 255) {
+                    newColorVal = 255;
+                } else if(newColorVal < 0) {
+                    newColorVal = 0;
+                }
+                _colorVal = newColorVal;
+                CRGB color = CRGB::Black;
+                color.setHSV(_colorHue, _colorSat, _colorVal);
+                _controller->setColor(color);
+                _currentEditColor = color;
+                break;
+            }
+        }
+        return;
+    }
+
     switch(_currentType) {
-        case BRIGHTNESS: {
+        case ValueType::BRIGHTNESS: {
             int16_t brightness = _controller->getBrightness();
             brightness += direction * _incrementMagnitude;
             if(brightness > 255) {
@@ -206,7 +269,7 @@ void IRHandler::handleValueIncrement(const int8_t direction) {
             _controller->setBrightness(brightness);
             break;
         }
-        case PALETTE_TYPE: {
+        case ValueType::PALETTE_TYPE: {
             // Disable held inputs
             if(_lastInputRepeat) break;
 
@@ -223,7 +286,7 @@ void IRHandler::handleValueIncrement(const int8_t direction) {
             _controller->setPalette(type);
             break;
         }
-        case DELAY: {
+        case ValueType::DELAY: {
             PaletteConfig config = _controller->getPaletteConfig();
             int32_t delay = config.delay;
             delay += direction * -_incrementMagnitude;
@@ -235,7 +298,7 @@ void IRHandler::handleValueIncrement(const int8_t direction) {
             _controller->setPaletteDelay(delay);
             break;
         }
-        case STRETCH: {
+        case ValueType::STRETCH: {
             PaletteConfig config = _controller->getPaletteConfig();
             int16_t stretch = config.stretch;
             stretch += direction;
@@ -254,23 +317,44 @@ void IRHandler::handleSwitchValueType(const int8_t direction) {
     // Disable held inputs
     if(_lastInputRepeat) return;
 
-    switch(_controller->getMode()) {
-        case LEDController::Mode::PALETTE: {
-            if(_currentType <= 0 && direction < 0) {
-                _currentType = (ValueType)VALUETYPE_MAX;
-            } else if(_currentType >= VALUETYPE_MAX && direction > 0) {
-                _currentType = (ValueType)0;
-            } else {
-                _currentType = (ValueType)(_currentType + direction);
+    if(_colorEditor) {
+        switch(_editorState) {
+            case EditorState::HUE: {
+                if(direction > 0) {
+                    editSaturation();
+                }
+                break;
             }
-            blink(((uint8_t)_currentType)+1, 300);
-            break;
+            case EditorState::SATURATION: {
+                if(direction > 0) {
+                    editBrightness();
+                } else {
+                    editHue();
+                }
+                break;
+            }
+            case EditorState::VALUE: {
+                if(direction > 0) {
+                    editEnd();
+                } else {
+                    editSaturation();
+                }
+                break;
+            }
         }
-        case LEDController::Mode::COLOR_SELECT: {
-            // TODO
-            break;
-        }
+        return;
     }
+
+    if(_controller->getMode() != LEDController::Mode::PALETTE) return;
+
+    if(_currentType <= 0 && direction < 0) {
+        _currentType = (ValueType)VALUETYPE_MAX;
+    } else if(_currentType >= VALUETYPE_MAX && direction > 0) {
+        _currentType = (ValueType)0;
+    } else {
+        _currentType = (ValueType)(_currentType + direction);
+    }
+    blink(((uint8_t)_currentType)+1, 300);
 }
 
 void IRHandler::handleSelect() {
@@ -280,6 +364,10 @@ void IRHandler::handleSelect() {
     if(_controller->getMode() == LEDController::Mode::PALETTE) {
         PaletteConfig config = _controller->getPaletteConfig();
         _controller->setPaletteBlending(!config.blending);
+    } else if(!_colorEditor) {
+        editStart();
+    } else {
+        editEnd();
     }
 }
 
@@ -292,6 +380,7 @@ void IRHandler::handleModeSwitch() {
     } else if(_controller->getMode() == LEDController::Mode::PALETTE) {
         _controller->setMode(LEDController::Mode::COLOR);
         _controller->setColor(_controller->getColor());
+        _currentType = ValueType::BRIGHTNESS;
     }
 }
 
@@ -306,4 +395,80 @@ void IRHandler::blink(const uint8_t times, const uint16_t interval) {
         delay(interval / 2);
     }
     _blinking = false;
+}
+
+void IRHandler::editStart() {
+    _colorEditor = true;
+    _colorFlash = false;
+    if(_controller->getBrightness() < 16) {
+        _controller->setBrightness(16);
+    }
+    editHue();
+}
+
+void IRHandler::editHue() {
+    Serial.println("Editing Hue");
+    _blinking = true;
+    _editorState = EditorState::HUE;
+    _controller->setColor(CRGB::Black);
+    _controller->setBrightness(64);
+    _controller->forceUpdate();
+    delay(EDITOR_OFF_FLASH);
+    _controller->distributePalette(RainbowColors_p);
+    _controller->forceUpdate();
+    delay(EDITOR_ON_FLASH);
+    _blinking = false;
+    Serial.println("Finished hue flash");
+
+    CRGB color = CRGB::Black;
+    color.setHSV(_colorHue, 255, 255);
+    _currentEditColor = color;
+    _controller->setColor(color);
+}
+
+void IRHandler::editSaturation() {
+    Serial.println("Editing Sat");
+    _blinking = true;
+    _editorState = EditorState::SATURATION;
+    _controller->setColor(CRGB::Black);
+    _controller->forceUpdate();
+    delay(EDITOR_OFF_FLASH);
+    CRGB color = CRGB::Black;
+    color.setHSV(_colorHue, 255, 255);
+    _controller->setGradient(color, CRGB::White);
+    _controller->forceUpdate();
+    delay(EDITOR_ON_FLASH);
+    _blinking = false;
+    Serial.println("Finished sat flash");
+
+    color.setHSV(_colorHue, _colorSat, 255);
+    _currentEditColor = color;
+    _controller->setColor(color);
+}
+
+void IRHandler::editBrightness() {
+    Serial.println("Editing Val");
+    _blinking = true;
+    _editorState = EditorState::VALUE;
+    _controller->setColor(CRGB::Black);
+    _controller->forceUpdate();
+    delay(EDITOR_OFF_FLASH);
+    CRGB color = CRGB::Black;
+    color.setHSV(_colorHue, _colorSat, 255);
+    _controller->setGradient(color, CRGB::Black);
+    _controller->forceUpdate();
+    delay(EDITOR_ON_FLASH);
+    _blinking = false;
+    Serial.println("Finished val flash");
+
+    color.setHSV(_colorHue, _colorSat, _colorVal);
+    _currentEditColor = color;
+    _controller->setColor(color);
+}
+
+void IRHandler::editEnd() {
+    CRGB color = CRGB::Black;
+    color.setHSV(_colorHue, _colorSat, _colorVal);
+    _controller->setColor(color);
+    _colorEditor = false;
 }
