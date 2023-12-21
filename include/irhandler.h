@@ -63,6 +63,9 @@ private:
     bool _colorFlash = false;
     CRGB _currentEditColor = CRGB::Red;
     uint64_t _nextFlashTimestamp = 0;
+
+    uint8_t _onBrightness = 0;
+    bool _on = true;
 };
 
 #endif

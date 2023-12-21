@@ -119,10 +119,11 @@ void IRHandler::loop() {
 
 void IRHandler::handleInput() {
     // TODO:
-    // if(off) {
-    //     turnOn();
-    //     return;
-    // }
+    if(!_on) {
+        _on = true;
+        _controller->setBrightness(_onBrightness);
+        return;
+    }
 
     digitalWrite(LED_BUILTIN, LOW);
     switch(_lastInput) {
@@ -197,6 +198,13 @@ void IRHandler::handleInput() {
             // OK
             if(_colorEditor) {
                 editEnd();
+            } else {
+                _onBrightness = _controller->getBrightness();
+                if(_onBrightness == 0) {
+                    _onBrightness = 16;
+                }
+                _controller->setBrightness(0);
+                _on = false;
             }
             // TODO: turnOff();
             break;
