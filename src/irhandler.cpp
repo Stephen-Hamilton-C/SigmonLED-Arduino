@@ -407,10 +407,10 @@ void IRHandler::editStart() {
 }
 
 void IRHandler::editHue() {
-    Serial.println("Editing Hue");
     _blinking = true;
     _editorState = EditorState::HUE;
     _controller->setColor(CRGB::Black);
+    // TODO: Get rid of this
     _controller->setBrightness(64);
     _controller->forceUpdate();
     delay(EDITOR_OFF_FLASH);
@@ -418,7 +418,6 @@ void IRHandler::editHue() {
     _controller->forceUpdate();
     delay(EDITOR_ON_FLASH);
     _blinking = false;
-    Serial.println("Finished hue flash");
 
     CRGB color = CRGB::Black;
     color.setHSV(_colorHue, 255, 255);
@@ -427,7 +426,6 @@ void IRHandler::editHue() {
 }
 
 void IRHandler::editSaturation() {
-    Serial.println("Editing Sat");
     _blinking = true;
     _editorState = EditorState::SATURATION;
     _controller->setColor(CRGB::Black);
@@ -439,7 +437,6 @@ void IRHandler::editSaturation() {
     _controller->forceUpdate();
     delay(EDITOR_ON_FLASH);
     _blinking = false;
-    Serial.println("Finished sat flash");
 
     color.setHSV(_colorHue, _colorSat, 255);
     _currentEditColor = color;
@@ -447,7 +444,6 @@ void IRHandler::editSaturation() {
 }
 
 void IRHandler::editBrightness() {
-    Serial.println("Editing Val");
     _blinking = true;
     _editorState = EditorState::VALUE;
     _controller->setColor(CRGB::Black);
@@ -459,7 +455,6 @@ void IRHandler::editBrightness() {
     _controller->forceUpdate();
     delay(EDITOR_ON_FLASH);
     _blinking = false;
-    Serial.println("Finished val flash");
 
     color.setHSV(_colorHue, _colorSat, _colorVal);
     _currentEditColor = color;
