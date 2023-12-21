@@ -80,20 +80,20 @@ void IRHandler::printInput(const uint32_t input) {
 }
 
 void IRHandler::loop() {
-    // if(_colorEditor) {
-    //     uint64_t now = millis();
-    //     if(now >= _nextFlashTimestamp) {
-    //         if(_colorFlash) {
-    //             _nextFlashTimestamp = now + EDITOR_INTERMITTENT_FLASH_PAUSE;
-    //             _controller->setColor(_currentEditColor);
-    //         } else {
-    //             _nextFlashTimestamp = now + EDITOR_INTERMITTENT_FLASH_OFF;
-    //             _controller->setColor(CRGB::Black);
-    //         }
+    if(_colorEditor) {
+        uint64_t now = millis();
+        if(now >= _nextFlashTimestamp) {
+            if(_colorFlash) {
+                _nextFlashTimestamp = now + EDITOR_INTERMITTENT_FLASH_PAUSE;
+                _controller->setColor(_currentEditColor);
+            } else {
+                _nextFlashTimestamp = now + EDITOR_INTERMITTENT_FLASH_OFF;
+                _controller->setColor(CRGB::Black);
+            }
 
-    //         _colorFlash = !_colorFlash;
-    //     }
-    // }
+            _colorFlash = !_colorFlash;
+        }
+    }
 
     if(irReceiver->decode()) {
         if(_blinking) {
