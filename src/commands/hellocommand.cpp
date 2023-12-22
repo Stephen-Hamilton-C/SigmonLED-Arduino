@@ -1,6 +1,6 @@
 #include "commands/hellocommand.h"
 
-void HelloCommand::run(char** command, LEDController& controller) {
+void HelloCommand::run(char** command, LEDController* controller) {
     // Version, Color, Mode, Brightness,
     // Palette type, Palette mode, Palette delay, Palette stretch, Palette blending
     // Version
@@ -8,7 +8,7 @@ void HelloCommand::run(char** command, LEDController& controller) {
     Serial.print(' ');
 
     // Color
-    CRGB color = controller.getColor();
+    CRGB color = controller->getColor();
     Serial.print(color.r);
     Serial.print(',');
     Serial.print(color.g);
@@ -19,14 +19,14 @@ void HelloCommand::run(char** command, LEDController& controller) {
     // Mode
     // COLOR = 0
     // PALETTE = 1
-    Serial.print(controller.getMode());
+    Serial.print(controller->getMode());
     Serial.print(' ');
 
     // Brightness
-    Serial.print(controller.getBrightness());
+    Serial.print(controller->getBrightness());
     Serial.print(' ');
 
-    PaletteConfig config = controller.getPaletteConfig();
+    PaletteConfig config = controller->getPaletteConfig();
     // Palette type
     // RAINBOW = 0
     // RAINBOW_STRIPE = 1

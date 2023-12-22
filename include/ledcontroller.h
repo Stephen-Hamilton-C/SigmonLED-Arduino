@@ -2,7 +2,6 @@
 #define LEDCONTROLLER_H
 
 #include <FastLED.h>
-#include <SoftwareSerial.h>
 #include "config.h"
 #include "palettemode.h"
 #include "paletteconfig.h"
@@ -13,6 +12,8 @@ public:
         COLOR,
         PALETTE,
     };
+
+    bool updateQueued = false;
 
     LEDController();
     void loop();
@@ -25,15 +26,19 @@ public:
     const uint8_t getBrightness();
     void setBrightness(const uint8_t& brightness);
 
-    void setPalette(const CRGBPalette16& palette, const PaletteType& type);
+    void setPalette(const PaletteType& type);
     void setPaletteMode(const PaletteMode& mode);
     void setPaletteDelay(const uint16_t& delay);
     void setPaletteStretch(const uint8_t& stretch);
     void setPaletteBlending(const bool& blending);
 
+    void setGradient(const CRGB& start, const CRGB& end);
+    void distributePalette(const CRGBPalette16& palette);
+    void forceUpdate();
+
     const PaletteConfig& getPaletteConfig();
 
-    CRGBPalette16 customPalette = CRGBPalette16(CRGB::Black);
+    CRGBPalette16 customPalette = CRGBPalette16(CRGB::Red, CRGB::Gray, CRGB::Blue, CRGB::Black);
 private:
     CRGB _leds[LED_COUNT];
 
@@ -53,6 +58,8 @@ private:
     };
 
     void setPaletteStaticColor();
+    uint8_t calculateGradientPixel(const int i, const uint8_t final, const uint8_t initial);
+    void updateStrip();
 };
 
 #endif

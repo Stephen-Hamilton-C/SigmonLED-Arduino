@@ -22,7 +22,7 @@ CRGB CustomPaletteCommand::colors[16] = {
 };
 
 
-void CustomPaletteCommand::run(char** command, LEDController& controller) {
+void CustomPaletteCommand::run(char** command, LEDController* controller) {
     // custom 0 255 255 255
     // custom 1 0 0 0
     // ...
@@ -40,7 +40,7 @@ void CustomPaletteCommand::run(char** command, LEDController& controller) {
     CustomPaletteCommand::colors[index] = CRGB(r, g, b);
 
     CRGBPalette16 palette = CRGBPalette16(CustomPaletteCommand::colors);
-    controller.customPalette = palette;
-    // controller.setPalette(palette, PaletteType::CUSTOM);
+    controller->customPalette = palette;
+    // controller.setPalette(PaletteType::CUSTOM);
     // controller.setMode(LEDController::Mode::PALETTE);
 }
