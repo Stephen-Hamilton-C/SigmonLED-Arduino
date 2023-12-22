@@ -3,12 +3,18 @@
 // but I have further ambitions that would further SigmonLED.
 
 #include <Arduino.h>
-#include "irhandler.h"
-#include "messagehandler.h"
 #include "config.h"
+#include "ledcontroller.h"
 
+
+#if ENABLE_SERIAL_COMMANDS
+#include "messagehandler.h"
 MessageHandler* msgHandler;
+#endif
+#if ENABLE_IR_INPUT
+#include "irhandler.h"
 IRHandler* irHandler;
+#endif
 LEDController* ledController;
 char buffer[MESSAGE_BUFFER];
 int bufferLen = 0;
@@ -20,8 +26,12 @@ void setup() {
     Serial.begin(SERIAL_BAUD);
     // TODO: Can command message handler coexist with IR?
     ledController = new LEDController();
+    #if ENABLE_SERIAL_COMMANDS
     msgHandler = new MessageHandler(ledController);
+    #endif
+    #if ENABLE_IR_INPUT
     irHandler = new IRHandler(ledController);
+    #endif
 
     // Disable the built-in LED
     pinMode(LED_BUILTIN, OUTPUT);
@@ -30,14 +40,21 @@ void setup() {
 
 void loop() {
     // Handle input
+    #if ENABLE_IR_INPUT
     if(ledController->updateQueued && irHandler->isIdle()) {
+    #else
+    if(ledController->updateQueued) {
+    #endif
         ledController->updateQueued = false;
         FastLED.show();
     }
 
+#if ENABLE_IR_INPUT
     // Remote input from IR
     irHandler->loop();
+#endif
 
+#if ENABLE_SERIAL_COMMANDS
     // Command input from Serial
     while(Serial.available()) {
         connected = true;
@@ -68,4 +85,6 @@ void loop() {
     }
 
     msgHandler->loop();
+#endif
+    ledController->loop();
 }

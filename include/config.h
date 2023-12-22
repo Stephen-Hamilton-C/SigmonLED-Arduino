@@ -8,6 +8,9 @@
 
 #define VERSION "3.1.0"
 
+#define ENABLE_SERIAL_COMMANDS true
+#define ENABLE_IR_INPUT false
+
 /**
  * @brief What to send to serial after a connection times out.
  * If this is set to 0, ignore.
@@ -26,7 +29,7 @@
 /**
  * @brief How many LEDs are on your LED strip.
 */
-#define LED_COUNT 8 //81
+#define LED_COUNT 200 //81
 /**
  * @brief The chipset of your LED strip. Most common type is WS2811
 */

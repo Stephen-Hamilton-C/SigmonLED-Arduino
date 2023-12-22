@@ -1,3 +1,6 @@
+#include "config.h"
+
+#if ENABLE_SERIAL_COMMANDS
 #include "messagehandler.h"
 
 #include "commands.h"
@@ -15,8 +18,6 @@ void MessageHandler::loop() {
             _cleanup();
         }
     }
-
-    _controller->loop();
 }
 
 void MessageHandler::processMessage(char message[], int messageLen) {
@@ -124,3 +125,4 @@ void MessageHandler::_freeStringArray(char** str, int len) {
 
     delete str;
 }
+#endif

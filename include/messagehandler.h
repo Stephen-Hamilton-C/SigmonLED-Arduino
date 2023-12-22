@@ -1,8 +1,10 @@
+#include "config.h"
+
+#if ENABLE_SERIAL_COMMANDS
 #ifndef MESSAGEHANDLER_H
 #define MESSAGEHANDLER_H
 
 #include <Arduino.h>
-#include "config.h"
 #include "commandinfo.h"
 #include "ledcontroller.h"
 
@@ -35,4 +37,5 @@ private:
     LEDController* _controller;
 };
 
+#endif
 #endif

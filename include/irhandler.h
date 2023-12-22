@@ -1,3 +1,6 @@
+#include "config.h"
+#if ENABLE_IR_INPUT
+
 #ifndef IRHANDLER_H
 #define IRHANDLER_H
 
@@ -64,4 +67,5 @@ private:
     uint64_t _nextFlashTimestamp = 0;
 };
 
+#endif
 #endif

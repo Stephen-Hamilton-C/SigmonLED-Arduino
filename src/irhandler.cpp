@@ -1,3 +1,6 @@
+#include "config.h"
+#if ENABLE_IR_INPUT
+
 #include "irhandler.h"
 #include <IRremote.h>
 #include "irmapping.h"
@@ -16,7 +19,7 @@ bool IRHandler::isIdle() {
 }
 
 void IRHandler::printInput(const uint32_t input) {
-    if(!ECHO) return;
+    #if ECHO
     switch(input) {
         case IRIN_1:
             Serial.println("IR: 1");
@@ -77,6 +80,7 @@ void IRHandler::printInput(const uint32_t input) {
             Serial.println(input, HEX);
             break;
     }
+    #endif
 }
 
 void IRHandler::loop() {
@@ -443,3 +447,4 @@ void IRHandler::editEnd() {
     _controller->setColor(color);
     _colorEditor = false;
 }
+#endif
