@@ -6,7 +6,7 @@
 
 #define ECHO false
 
-#define VERSION "3.1.0"
+#define VERSION "3.2.0"
 
 #define ENABLE_SERIAL_COMMANDS true
 #define ENABLE_IR_INPUT false
