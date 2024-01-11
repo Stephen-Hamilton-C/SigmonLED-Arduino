@@ -140,9 +140,11 @@ void LEDController::setGradient(const CRGB& start, const CRGB& end) {
 }
 
 uint8_t LEDController::calculateGradientPixel(const int i, const uint8_t final, const uint8_t initial) {
-    int16_t change = final - initial;
-    int changePerPixel = change / (LED_COUNT - 1);
-    int result = initial + (changePerPixel * i);
+    // final: 127
+    // initial: 255
+    float change = final - initial;
+    float changePerPixel = change / (LED_COUNT - 1);
+    int16_t result = initial + (changePerPixel * i);
     if(result < 0) {
         result *= -1;
     }

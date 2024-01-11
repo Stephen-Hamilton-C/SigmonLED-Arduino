@@ -10,10 +10,9 @@
 #define VALUETYPE_MAX 4
 #define PALETTETYPE_MAX 6
 #define PALETTEMODE_MAX 2
+#define EDITOR_GLOW_TICKS 10000
 #define EDITOR_OFF_FLASH 100
 #define EDITOR_ON_FLASH 800
-#define EDITOR_INTERMITTENT_FLASH_PAUSE 750
-#define EDITOR_INTERMITTENT_FLASH_OFF 250
 
 class IRHandler {
 public:
@@ -40,12 +39,12 @@ private:
 
     void printInput(const uint32_t input);
     void handleInput();
+    void handleDecode();
     void handleDigit(const uint8_t digit);
     void handleValueIncrement(const int8_t direction);
     void handleSwitchValueType(const int8_t direction);
     void handleSelect();
     void handleModeSwitch();
-    void blink(const uint8_t times, const uint16_t interval);
 
     void editStart();
     void editHue();
@@ -54,17 +53,29 @@ private:
 
 
     LEDController* _controller;
-    uint8_t _incrementMagnitude = MAX_INCREMENT / 2;
     ValueType _currentType = ValueType::BRIGHTNESS;
     bool _blinking = false;
+    CRGB _colors[10] = {
+        CRGB::White,
+        CRGB(255, 200, 100),
+        CRGB::Red,
+        CRGB::Orange,
+        CRGB::Yellow,
+        CRGB::Green,
+        CRGB::Teal,
+        CRGB::Blue,
+        CRGB::Purple,
+        CRGB::Magenta
+    };
+    uint8_t _currentColor = 1;
 
     bool _colorEditor = false;
+    int8_t _colorDirection = -1;
+    uint64_t _editorTick = 0;
+    uint8_t _brightness = 0;
     EditorState _editorState = EditorState::HUE;
     uint8_t _colorHue = 0;
     uint8_t _colorSat = 255;
-    bool _colorFlash = false;
-    CRGB _currentEditColor = CRGB::Red;
-    uint64_t _nextFlashTimestamp = 0;
 };
 
 #endif

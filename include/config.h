@@ -58,9 +58,9 @@
 */
 #define IR_TIMEOUT 200
 /**
- * @brief The maximum increment magnitude value for IR inputs
+ * @brief The increment magnitude for certain IR inputs
 */
-#define MAX_INCREMENT 20
+#define IR_INCREMENT 5
 /**
  * @brief The desired baud rate for the hardware serial port
  * Send `AT+BAUD1` to go into 19200 baud mode on HM10 BLE modules.
