@@ -67,7 +67,7 @@ private:
         CRGB::Purple,
         CRGB::Magenta
     };
-    uint8_t _currentColor = 1;
+    uint8_t _currentColor = 0;
 
     bool _colorEditor = false;
     int8_t _colorDirection = -1;
