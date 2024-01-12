@@ -43,7 +43,100 @@ However, each can be enabled or disabled with the `ENABLE_SERIAL_COMMANDS` and `
 
 
 ## Serial Commands
-Coming soon™
+
+
+### Command Behavior
+All Serial commands now require verification when sent.
+Commands are delimited with a newline character (`\n`).
+When a command is sent, the Arduino will respond with `verify <command>` if it recognizes the command.
+`<command>` will, of course, be replaced with what was sent.
+The Arduino will then wait for `confirm` to run the command.
+If the command does not match, resending the command will start the process over.
+If the command is not recognized,
+or if there is no response within a set time (defined by `MESSAGE_TIMEOUT` in [config.h][config]),
+then the Arduino responds with `disregard` and ignores the command.
+If `confirm` is sent, the Arduino responds with `confirmed` if arguments are valid,
+or `disregard` if something went wrong running the command.
+
+Examples: (TX = Send to Arduino, RX = Receive from Arduino. Every transmission ends in `\n`)
+```
+TX: color 255 0 0
+RX: verify color 255 0 0
+TX: confirm
+RX: confirmed
+```
+```
+TX: lol hello
+RX: disregard
+```
+```
+TX: color 0 255 0
+RX: verify color 0 255 0
+TX: color 0 0 255
+RX: verify color 0 0 255
+TX: confirm
+RX: confirmed
+```
+```
+TX: color 255 255 255
+RX: verify color 255 255 255
+*5 seconds pass*
+RX: disregard
+```
+
+
+### Commands
+- `color <red> <green> <blue>`
+  - Changes the entire strip to the color provided.
+  - red, green, and blue arguments must be within the inclusive range 0 - 255
+- `hello`
+  - Returns the current state of the controller
+  - Format: `MAJOR.MINOR.PATCH red,green,blue mode brightness palette_type palette_delay palette_stretch palette_mode palette_blending`
+  - Example: `3.2.0 255,0,0 0 255 0 10 8 0 1`
+- `blend <int>`
+  - Sets the palette blending mode.
+  - Possible values:
+
+| Blend Value | Description |
+| ----------- | ----------- |
+|   0   | No blending |
+|   1   | Linear blending |
+|   2   | Linear blending, no wrap |
+- `bright <int>`
+  - Sets the brightness of the current color or palette
+  - Must be within the inclusive range 0 - 255
+- `delay <int>`
+  - Sets the millisecond delay between palette scroll updates
+  - Must be within the inclusive range 0 - 65535
+- `palette <int>`
+  - Sets the current palette to be used and switches to palette mode
+  - Possible values:
+ 
+| Palette Value | Description |
+| ------------- | ----------- |
+|   0   |   Rainbow   |
+|   1   | Rainbow Stripe |
+|   2   |    Party    |
+|   3   |    Ocean    |
+|   4   |    Lava     |
+|   5   |    Forest   |
+|   6   |    Custom   |
+- `pmode <int>`
+  - Sets the palette scrolling mode
+  - Possible values:
+
+| Palette Mode | Description |
+| ------------ | ----------- |
+|       0      | Static - No Scrolling |
+|       1      | Scroll |
+|       2      | Solid - Entire LED strip scrolls through palette |
+- `stretch <int>`
+  - Sets the distribution of palette colors across the LED strip
+  - Must be within the inclusive range 0 - 255
+- `custom <index> <red> <green> <blue>`
+  - Sets the color at the given index for the custom palette
+  - index must be within the inclusive range 0 - 15
+  - red, green, and blue must be within the inclusive range 0 - 255
 
 
 ## IR Usage
